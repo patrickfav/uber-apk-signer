@@ -1,4 +1,4 @@
-package at.favre.tools.apksigner;
+package at.favre.tools.apksigner.util;
 
 import java.io.File;
 

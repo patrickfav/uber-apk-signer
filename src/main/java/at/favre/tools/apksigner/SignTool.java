@@ -1,17 +1,12 @@
 package at.favre.tools.apksigner;
 
-import at.favre.tools.apksigner.parser.AdbDevice;
-import at.favre.tools.apksigner.parser.AdbDevicesParser;
-import at.favre.tools.apksigner.parser.InstalledPackagesParser;
-import at.favre.tools.apksigner.parser.PackageMatcher;
 import at.favre.tools.apksigner.ui.Arg;
 import at.favre.tools.apksigner.ui.CLIParser;
+import at.favre.tools.apksigner.util.CmdUtil;
+import at.favre.tools.apksigner.util.FileUtil;
 import com.android.apksigner.ApkSignerTool;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.*;
 
 public class SignTool {
@@ -55,6 +50,7 @@ public class SignTool {
             logErr(e.getMessage());
 
             if (arguments.debug) {
+                e.printStackTrace();
                 logErr(getCommandHistory(executedCommands));
             } else {
                 logErr("Run with '-debug' parameter to get additional information.");
@@ -81,7 +77,7 @@ public class SignTool {
 
             if (zipAlignToolFile != null && zipAlignToolFile.exists() && zipAlignToolFile.isFile()) {
                 CmdUtil.runCmd(new String[]{zipAlignToolFile.getAbsolutePath(), "4", targetApkFile.getAbsolutePath(), outFile.getAbsolutePath()});
-                log("\r\r- aligned");
+                log("\t\t- aligned");
             } else {
                 throw new IllegalArgumentException("could not find zipalign - either skip it or provide a proper location");
             }
@@ -103,27 +99,27 @@ public class SignTool {
 
             ApkSignerTool.main(new String[]{
                     "sign",
-                    "--ks", arguments.ksFile,
-                    "--ks-key-alias", arguments.ksAliasName,
-                    "--ks-pass ", signingConfig.ksPass == null ? "stdout" : signingConfig.ksPass,
-                    "--key-pass", signingConfig.ksKeyPass == null ? "stdout" : signingConfig.ksPass,
+                    "--ks", signingConfig.keystore.getAbsolutePath(),
+                    "--ks-pass", signingConfig.ksPass == null ? "stdout" : "pass:" + signingConfig.ksPass,
+                    "--key-pass", signingConfig.ksKeyPass == null ? "stdout" : "pass:" + signingConfig.ksPass,
+                    "--ks-key-alias", signingConfig.ksAlias,
                     "--out", outFile.getAbsolutePath(),
                     targetApkFile.getAbsolutePath()
             });
 
-            log("\r\r- signed (" + signingConfig.location + ")");
+            log("\t\t- signed (" + signingConfig.location + ")");
         } catch (Exception e) {
-            throw new IllegalStateException("could not sign " + targetApkFile + ": " + e.getMessage());
+            throw new IllegalStateException("could not sign " + targetApkFile + ": " + e.getMessage(), e);
         }
     }
 
     private static void verify(File targetApkFile, Arg arguments) {
         try {
             ApkSignerTool.main(new String[]{
-                    "verify",
+                    "verify", "--verbose",
                     targetApkFile.getAbsolutePath()
             });
-            log("\r\r- verified");
+            log("\t\t- verified");
         } catch (Exception e) {
             throw new IllegalStateException("could not verify " + targetApkFile + ": " + e.getMessage());
         }

@@ -1,5 +1,7 @@
 package at.favre.tools.apksigner;
 
+import at.favre.tools.apksigner.util.CmdUtil;
+
 public class AdbLocationFinder {
     public enum Location {PATH, PATH_WIN, CUSTOM, WIN_DEFAULT, MAC_DEFAULT, LINUX_DEFAULT}
 
