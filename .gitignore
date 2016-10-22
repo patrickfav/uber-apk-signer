@@ -1,0 +1,36 @@
+.DS_Store
+.settings
+.metadata
+bin
+gen
+NewFile.*
+lint.xml
+local.properties
+app.properties
+junit-report.xml
+build
+target
+
+*.dex
+*.apk
+*.ap_
+*.class
+
+out
+proguard
+/RemoteSystemsTempFiles
+.gradle
+Thumbs.db
+
+# ignored intellij
+.idea
+.navigation
+*.iml
+*.ipr
+
+
+# Eclipse project files
+.classpath
+.project
+
+signing.properties
