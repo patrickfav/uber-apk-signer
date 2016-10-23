@@ -49,6 +49,8 @@ public class SignTool {
                 }
             }
 
+            long startTime = System.currentTimeMillis();
+            int success = 0;
             for (File targetApkFile : targetApkFiles) {
                 if (targetApkFile.isFile() && FileUtil.getFileExtension(targetApkFile).toLowerCase().equals("apk")) {
                     log("\n\r" + targetApkFile.getName());
@@ -56,9 +58,11 @@ public class SignTool {
                     targetApkFile = sign(targetApkFile, outFolder, arguments);
                     zipAlign(true, targetApkFile, outFolder, arguments, executedCommands);
                     verify(targetApkFile, arguments);
-
+                    success++;
                 }
             }
+
+            log(String.format(Locale.US, "\nSuccessfully processed %d APKs in %.2f seconds.", success, (double) (System.currentTimeMillis() - startTime) / 1000.0));
 
             if (arguments.debug) {
                 log(getCommandHistory(executedCommands));
