@@ -24,22 +24,39 @@ public class SignTool {
 
         try {
             File argApkFile = new File(arguments.apkFile);
+            File outFolder;
             List<File> targetApkFiles = new ArrayList<>();
 
             if (argApkFile.exists() && argApkFile.isDirectory()) {
                 Collections.addAll(targetApkFiles, argApkFile.listFiles());
+                outFolder = argApkFile;
             } else if (argApkFile.exists()) {
                 targetApkFiles.add(argApkFile);
+                outFolder = argApkFile.getParentFile();
             } else {
                 throw new IllegalArgumentException("provided apk path " + arguments.apkFile + " does not exist");
             }
 
+            if (arguments.out != null) {
+                outFolder = new File(arguments.out);
+
+                if (!outFolder.exists()) {
+                    outFolder.mkdirs();
+                }
+
+                if (!outFolder.exists() || !outFolder.isDirectory()) {
+                    throw new IllegalArgumentException("if out directory is provided it must exist and be a path: " + arguments.out);
+                }
+            }
+
             for (File targetApkFile : targetApkFiles) {
                 if (targetApkFile.isFile() && FileUtil.getFileExtension(targetApkFile).toLowerCase().equals("apk")) {
-                    log("\r" + targetApkFile.getName());
-                    zipAlign(targetApkFile, arguments);
-                    sign(targetApkFile, arguments);
+                    log("\n\r" + targetApkFile.getName());
+                    targetApkFile = zipAlign(false, targetApkFile, outFolder, arguments, executedCommands);
+                    targetApkFile = sign(targetApkFile, outFolder, arguments);
+                    zipAlign(true, targetApkFile, outFolder, arguments, executedCommands);
                     verify(targetApkFile, arguments);
+
                 }
             }
 
@@ -58,33 +75,56 @@ public class SignTool {
         }
     }
 
-    private static void zipAlign(File targetApkFile, Arg arguments) {
+    private static File zipAlign(boolean onlyVerify, File targetApkFile, File outFolder, Arg arguments, List<CmdUtil.Result> cmdList) {
         if (!arguments.skipZipAlign) {
-            File zipAlignToolFile = null;
-            if (arguments.zipAlignPath != null) {
-                zipAlignToolFile = new File(arguments.zipAlignPath);
-            } else {
-                //TODO use embedded
-            }
+            ZipAlignExecutor executor = new ZipAlignExecutor(arguments);
 
             File outFile = targetApkFile;
-            if (!arguments.overwrite) {
-                String fileName = FileUtil.getFileNameWithoutExtension(targetApkFile);
-                fileName = fileName.replace("-unaligned", "");
-                fileName += "_aligned";
-                outFile = new File(targetApkFile.getParentFile(), fileName + "." + FileUtil.getFileExtension(targetApkFile));
+            if (!onlyVerify) {
+                if (!arguments.overwrite) {
+                    String fileName = FileUtil.getFileNameWithoutExtension(targetApkFile);
+                    fileName = fileName.replace("-unaligned", "");
+                    fileName += "_aligned";
+                    outFile = new File(outFolder, fileName + "." + FileUtil.getFileExtension(targetApkFile));
+                }
+
+                if (outFile.exists()) {
+                    outFile.delete();
+                }
             }
 
-            if (zipAlignToolFile != null && zipAlignToolFile.exists() && zipAlignToolFile.isFile()) {
-                CmdUtil.runCmd(new String[]{zipAlignToolFile.getAbsolutePath(), "4", targetApkFile.getAbsolutePath(), outFile.getAbsolutePath()});
-                log("\t\t- aligned");
+            if (executor.isExecutableFound()) {
+                String logMsg = "\t- ";
+
+                if (!onlyVerify) {
+                    CmdUtil.Result zipAlignResult = CmdUtil.runCmd(new String[]{executor.zipAlignExecutable.getAbsolutePath(), "4", targetApkFile.getAbsolutePath(), outFile.getAbsolutePath()});
+                    cmdList.add(zipAlignResult);
+                    if (zipAlignResult.success()) {
+                        logMsg += "aligned & ";
+                    } else {
+                        logMsg += "could not align";
+                    }
+                }
+
+                CmdUtil.Result zipAlignVerifyResult = CmdUtil.runCmd(new String[]{executor.zipAlignExecutable.getAbsolutePath(), "-c", "4", outFile.getAbsolutePath()});
+                cmdList.add(zipAlignVerifyResult);
+                if (zipAlignVerifyResult.success()) {
+                    logMsg += "zipalign verified";
+                } else {
+                    logMsg += "zipalign verify failed";
+                }
+
+
+                log(logMsg + " (" + outFile.getName() + ")");
             } else {
                 throw new IllegalArgumentException("could not find zipalign - either skip it or provide a proper location");
             }
+            return outFile;
         }
+        return targetApkFile;
     }
 
-    private static void sign(File targetApkFile, Arg arguments) {
+    private static File sign(File targetApkFile, File outFolder, Arg arguments) {
         try {
             File outFile = targetApkFile;
 
@@ -92,7 +132,11 @@ public class SignTool {
                 String fileName = FileUtil.getFileNameWithoutExtension(targetApkFile);
                 fileName = fileName.replace("-unsigned", "");
                 fileName += "_signed";
-                outFile = new File(targetApkFile.getParentFile(), fileName + "." + FileUtil.getFileExtension(targetApkFile));
+                outFile = new File(outFolder, fileName + "." + FileUtil.getFileExtension(targetApkFile));
+            }
+
+            if (outFile.exists()) {
+                outFile.delete();
             }
 
             SigningConfig signingConfig = new SigingConfigEngine().generate(arguments);
@@ -107,7 +151,9 @@ public class SignTool {
                     targetApkFile.getAbsolutePath()
             });
 
-            log("\t\t- signed (" + signingConfig.location + ")");
+            log("\t- signed [" + signingConfig.location + "] (" + outFile.getName() + ")");
+
+            return outFile;
         } catch (Exception e) {
             throw new IllegalStateException("could not sign " + targetApkFile + ": " + e.getMessage(), e);
         }
@@ -116,10 +162,10 @@ public class SignTool {
     private static void verify(File targetApkFile, Arg arguments) {
         try {
             ApkSignerTool.main(new String[]{
-                    "verify", "--verbose",
+                    "verify",
                     targetApkFile.getAbsolutePath()
             });
-            log("\t\t- verified");
+            log("\t- signature verified");
         } catch (Exception e) {
             throw new IllegalStateException("could not verify " + targetApkFile + ": " + e.getMessage());
         }

@@ -85,5 +85,9 @@ public class CmdUtil {
         public String toString() {
             return cmd + "\n" + out + "\n";
         }
+
+        public boolean success() {
+            return exitValue == 0;
+        }
     }
 }

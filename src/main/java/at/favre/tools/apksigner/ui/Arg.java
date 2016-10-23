@@ -3,6 +3,7 @@ package at.favre.tools.apksigner.ui;
 
 public class Arg {
     public String apkFile;
+    public String out;
 
     public boolean debugSign;
 
@@ -23,9 +24,10 @@ public class Arg {
     public Arg() {
     }
 
-    public Arg(String apkFile, boolean debugSign, String ksFile, String ksPass, String ksKeyPass, String ksAliasName,
+    public Arg(String apkFile, String out, boolean debugSign, String ksFile, String ksPass, String ksKeyPass, String ksAliasName,
                boolean overwrite, boolean dryRun, boolean verbose, boolean skipZipAlign, boolean debug, boolean onlyVerify, String zipAlignPath) {
         this.apkFile = apkFile;
+        this.out = out;
         this.debugSign = debugSign;
         this.ksFile = ksFile;
         this.ksPass = ksPass;
@@ -55,6 +57,7 @@ public class Arg {
         if (debug != arg.debug) return false;
         if (onlyVerify != arg.onlyVerify) return false;
         if (apkFile != null ? !apkFile.equals(arg.apkFile) : arg.apkFile != null) return false;
+        if (out != null ? !out.equals(arg.out) : arg.out != null) return false;
         if (ksFile != null ? !ksFile.equals(arg.ksFile) : arg.ksFile != null) return false;
         if (ksPass != null ? !ksPass.equals(arg.ksPass) : arg.ksPass != null) return false;
         if (ksKeyPass != null ? !ksKeyPass.equals(arg.ksKeyPass) : arg.ksKeyPass != null) return false;
@@ -66,6 +69,7 @@ public class Arg {
     @Override
     public int hashCode() {
         int result = apkFile != null ? apkFile.hashCode() : 0;
+        result = 31 * result + (out != null ? out.hashCode() : 0);
         result = 31 * result + (debugSign ? 1 : 0);
         result = 31 * result + (ksFile != null ? ksFile.hashCode() : 0);
         result = 31 * result + (ksPass != null ? ksPass.hashCode() : 0);
@@ -85,6 +89,7 @@ public class Arg {
     public String toString() {
         return "Arg{" +
                 "apkFile='" + apkFile + '\'' +
+                ", out='" + out + '\'' +
                 ", debugSign=" + debugSign +
                 ", ksFile='" + ksFile + '\'' +
                 ", ksPass='" + ksPass + '\'' +

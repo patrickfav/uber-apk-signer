@@ -27,6 +27,7 @@ public class CLIParser {
 
             argument.apkFile = commandLine.getOptionValue(ARG_APK_FILE);
             argument.zipAlignPath = commandLine.getOptionValue("zipAlignPath");
+            argument.out = commandLine.getOptionValue("out");
 
             argument.ksFile = commandLine.getOptionValue("ks");
             argument.ksPass = commandLine.getOptionValue("ksPass");
@@ -49,6 +50,10 @@ public class CLIParser {
                 throw new IllegalArgumentException("must provide keystore file if any keystore config is given");
             }
 
+            if (argument.overwrite && argument.out != null) {
+                throw new IllegalArgumentException("either provide out path or overwrite argument, cannot process both");
+            }
+
         } catch (Exception e) {
             System.err.println(e.getMessage());
 
@@ -63,6 +68,8 @@ public class CLIParser {
     private static Options setupOptions() {
         Options options = new Options();
         Option apkPathOpt = Option.builder(ARG_APK_FILE).longOpt("apk").argName("package name").hasArg(true).desc("Filter string that has to be a package name or part of it containing wildcards '*'. Can be multiple filter Strings comma separated. Example: 'com.android.*' or 'com.android.*,com.google.*'").build();
+        Option outOpt = Option.builder("o").longOpt("out").argName("path").hasArg(true).desc("").build();
+
         Option ksOpt = Option.builder().longOpt("ks").argName("keystore").hasArg(true).desc("").build();
         Option ksPassOpt = Option.builder().longOpt("ksPass").argName("password").hasArg(true).desc("").build();
         Option ksKeyPassOpt = Option.builder().longOpt("ksKeyPass").argName("password").hasArg(true).desc("").build();
@@ -87,7 +94,7 @@ public class CLIParser {
         options.addOptionGroup(mainArgs);
         options.addOption(ksOpt).addOption(ksPassOpt).addOption(ksKeyPassOpt).addOption(ksAliasOpt).addOption(verifyOnlyOpt)
                 .addOption(dryRunOpt).addOption(skipZipOpt).addOption(overwriteOpt).addOption(verboseOpt).addOption(debugOpt)
-                .addOption(zipAlignPathOpt).addOption(debugSignedOpt);
+                .addOption(zipAlignPathOpt).addOption(debugSignedOpt).addOption(outOpt);
 
         return options;
     }
