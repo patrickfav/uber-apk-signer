@@ -1,4 +1,4 @@
-package at.favre.tools.apksigner;
+package at.favre.tools.apksigner.signing;
 
 import at.favre.tools.apksigner.ui.Arg;
 import at.favre.tools.apksigner.util.CmdUtil;

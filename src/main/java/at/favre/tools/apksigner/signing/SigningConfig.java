@@ -1,4 +1,4 @@
-package at.favre.tools.apksigner;
+package at.favre.tools.apksigner.signing;
 
 import java.io.File;
 

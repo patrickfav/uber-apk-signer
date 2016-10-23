@@ -1,5 +1,8 @@
 package at.favre.tools.apksigner;
 
+import at.favre.tools.apksigner.signing.AndroidApkSignerVerify;
+import at.favre.tools.apksigner.signing.SigingConfigEngine;
+import at.favre.tools.apksigner.signing.SigningConfig;
 import at.favre.tools.apksigner.ui.Arg;
 import at.favre.tools.apksigner.ui.CLIParser;
 import at.favre.tools.apksigner.util.CmdUtil;
@@ -37,6 +40,8 @@ public class SignTool {
                 throw new IllegalArgumentException("provided apk path " + arguments.apkFile + " does not exist");
             }
 
+            Collections.sort(targetApkFiles);
+
             if (arguments.out != null) {
                 outFolder = new File(arguments.out);
 
@@ -51,15 +56,35 @@ public class SignTool {
 
             long startTime = System.currentTimeMillis();
             int success = 0;
+            List<File> tempFilesToDelete = new ArrayList<>();
             for (File targetApkFile : targetApkFiles) {
                 if (targetApkFile.isFile() && FileUtil.getFileExtension(targetApkFile).toLowerCase().equals("apk")) {
                     log("\n\r" + targetApkFile.getName());
-                    targetApkFile = zipAlign(false, targetApkFile, outFolder, arguments, executedCommands);
-                    targetApkFile = sign(targetApkFile, outFolder, arguments);
-                    zipAlign(true, targetApkFile, outFolder, arguments, executedCommands);
-                    verify(targetApkFile, arguments);
+                    if (arguments.dryRun) {
+                        log("\t - (skip)");
+                    }
+
+                    if (!arguments.onlyVerify && verify(targetApkFile, false, true)) {
+                        log("\t - already signed SKIP");
+                        continue;
+                    }
+
+                    if (!arguments.onlyVerify) {
+                        targetApkFile = zipAlign(false, targetApkFile, outFolder, arguments, executedCommands);
+                        tempFilesToDelete.add(targetApkFile);
+                        targetApkFile = sign(targetApkFile, outFolder, arguments);
+                        zipAlign(true, targetApkFile, outFolder, arguments, executedCommands);
+                    }
+                    verify(targetApkFile, arguments.verbose, false);
                     success++;
                 }
+            }
+
+            for (File file : tempFilesToDelete) {
+                if (arguments.verbose) {
+                    log("delete temp file " + file);
+                }
+                file.delete();
             }
 
             log(String.format(Locale.US, "\nSuccessfully processed %d APKs in %.2f seconds.", success, (double) (System.currentTimeMillis() - startTime) / 1000.0));
@@ -145,15 +170,24 @@ public class SignTool {
 
             SigningConfig signingConfig = new SigingConfigEngine().generate(arguments);
 
-            ApkSignerTool.main(new String[]{
+            String[] argArr = new String[]{
                     "sign",
                     "--ks", signingConfig.keystore.getAbsolutePath(),
                     "--ks-pass", signingConfig.ksPass == null ? "stdout" : "pass:" + signingConfig.ksPass,
                     "--key-pass", signingConfig.ksKeyPass == null ? "stdout" : "pass:" + signingConfig.ksPass,
                     "--ks-key-alias", signingConfig.ksAlias,
-                    "--out", outFile.getAbsolutePath(),
+                    "--out", outFile.getAbsolutePath()
+            };
+
+            if (arguments.verbose) {
+                argArr = CmdUtil.concat(argArr, new String[]{"--verbose"});
+            }
+
+            argArr = CmdUtil.concat(argArr, new String[]{
                     targetApkFile.getAbsolutePath()
             });
+
+            ApkSignerTool.main(argArr);
 
             log("\t- signed [" + signingConfig.location + "] (" + outFile.getName() + ")");
 
@@ -163,13 +197,23 @@ public class SignTool {
         }
     }
 
-    private static void verify(File targetApkFile, Arg arguments) {
+    private static boolean verify(File targetApkFile, boolean verbose, boolean noLog) {
         try {
-            ApkSignerTool.main(new String[]{
-                    "verify",
-                    targetApkFile.getAbsolutePath()
-            });
-            log("\t- signature verified");
+            AndroidApkSignerVerify verifier = new AndroidApkSignerVerify();
+            AndroidApkSignerVerify.Result result = verifier.verify(targetApkFile, verbose, null, null, false, verbose);
+
+            if (!noLog) {
+                if (result.verified) {
+                    log("\t- signature verified (" + targetApkFile.getName() + ")");
+                } else {
+                    log("\t- signature NOT VERIFIED (" + targetApkFile.getName() + ")");
+                }
+
+                if (verbose) {
+                    log(result.log);
+                }
+            }
+            return result.verified;
         } catch (Exception e) {
             throw new IllegalStateException("could not verify " + targetApkFile + ": " + e.getMessage());
         }
