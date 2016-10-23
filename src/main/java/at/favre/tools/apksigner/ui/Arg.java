@@ -5,8 +5,6 @@ public class Arg {
     public String apkFile;
     public String out;
 
-    public boolean debugSign;
-
     public String ksFile;
     public String ksPass;
     public String ksKeyPass;
@@ -24,11 +22,10 @@ public class Arg {
     public Arg() {
     }
 
-    public Arg(String apkFile, String out, boolean debugSign, String ksFile, String ksPass, String ksKeyPass, String ksAliasName,
+    public Arg(String apkFile, String out, String ksFile, String ksPass, String ksKeyPass, String ksAliasName,
                boolean overwrite, boolean dryRun, boolean verbose, boolean skipZipAlign, boolean debug, boolean onlyVerify, String zipAlignPath) {
         this.apkFile = apkFile;
         this.out = out;
-        this.debugSign = debugSign;
         this.ksFile = ksFile;
         this.ksPass = ksPass;
         this.ksKeyPass = ksKeyPass;
@@ -49,7 +46,6 @@ public class Arg {
 
         Arg arg = (Arg) o;
 
-        if (debugSign != arg.debugSign) return false;
         if (overwrite != arg.overwrite) return false;
         if (dryRun != arg.dryRun) return false;
         if (verbose != arg.verbose) return false;
@@ -70,7 +66,6 @@ public class Arg {
     public int hashCode() {
         int result = apkFile != null ? apkFile.hashCode() : 0;
         result = 31 * result + (out != null ? out.hashCode() : 0);
-        result = 31 * result + (debugSign ? 1 : 0);
         result = 31 * result + (ksFile != null ? ksFile.hashCode() : 0);
         result = 31 * result + (ksPass != null ? ksPass.hashCode() : 0);
         result = 31 * result + (ksKeyPass != null ? ksKeyPass.hashCode() : 0);
@@ -90,7 +85,6 @@ public class Arg {
         return "Arg{" +
                 "apkFile='" + apkFile + '\'' +
                 ", out='" + out + '\'' +
-                ", debugSign=" + debugSign +
                 ", ksFile='" + ksFile + '\'' +
                 ", ksPass='" + ksPass + '\'' +
                 ", ksKeyPass='" + ksKeyPass + '\'' +

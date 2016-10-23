@@ -1,6 +1,8 @@
 package at.favre.tools.apksigner.util;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileFilter;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
@@ -30,25 +32,44 @@ public class CmdUtil {
     }
 
     public static boolean canRunCmd(String[] cmd) {
-        try {
-            ProcessBuilder pb = new ProcessBuilder(cmd);
-            pb.redirectErrorStream(true);
-            Process process = pb.start();
-            try (BufferedReader inStreamReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                while ((inStreamReader.readLine()) != null) {
-                }
-            }
-            process.waitFor();
-        } catch (Exception e) {
+        Result result = runCmd(cmd);
+
+        if (result.exception != null) {
             return false;
+        } else {
+            return true;
         }
-        return true;
     }
 
     public static <T> T[] concat(T[] first, T[] second) {
         T[] result = Arrays.copyOf(first, first.length + second.length);
         System.arraycopy(second, 0, result, first.length, second.length);
         return result;
+    }
+
+    public static File checkAndGetFromPATHEnvVar(final String matchesExecutable) {
+        String[] pathParts = System.getenv("PATH").split(";");
+        for (String pathPart : pathParts) {
+            File pathFile = new File(pathPart);
+
+            if (pathFile.isFile() && pathFile.getName().toLowerCase().contains(matchesExecutable)) {
+                return pathFile;
+            } else if (pathFile.isDirectory()) {
+                File[] matchedFiles = pathFile.listFiles(new FileFilter() {
+                    @Override
+                    public boolean accept(File pathname) {
+                        return pathname.getName().toLowerCase().contains(matchesExecutable);
+                    }
+                });
+
+                for (File matchedFile : matchedFiles) {
+                    if (CmdUtil.canRunCmd(new String[]{matchedFile.getAbsolutePath()})) {
+                        return matchedFile;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     public static OS getOsType() {

@@ -40,7 +40,6 @@ public class CLIParser {
             argument.overwrite = commandLine.hasOption("overwrite");
             argument.verbose = commandLine.hasOption("verbose");
             argument.skipZipAlign = commandLine.hasOption("skipZipAlign");
-            argument.debugSign = commandLine.hasOption("debugSigned");
 
             if (argument.apkFile == null || argument.apkFile.isEmpty()) {
                 throw new IllegalArgumentException("must provide apk file or folder");
@@ -82,7 +81,6 @@ public class CLIParser {
         Option overwriteOpt = Option.builder().longOpt("overwrite").hasArg(false).desc("Will overwrite/delete the unsigned apks").build();
         Option verboseOpt = Option.builder().longOpt("verbose").hasArg(false).desc("Prints more output, especially useful for sign verify.").build();
         Option debugOpt = Option.builder().longOpt("debug").hasArg(false).desc("Prints additional info for debugging.").build();
-        Option debugSignedOpt = Option.builder().longOpt("debugSigned").hasArg(false).desc("Prints additional info for debugging.").build();
 
         Option help = Option.builder("h").longOpt("help").desc("Prints docs").build();
         Option version = Option.builder("v").longOpt("version").desc("Prints current version.").build();
@@ -94,7 +92,7 @@ public class CLIParser {
         options.addOptionGroup(mainArgs);
         options.addOption(ksOpt).addOption(ksPassOpt).addOption(ksKeyPassOpt).addOption(ksAliasOpt).addOption(verifyOnlyOpt)
                 .addOption(dryRunOpt).addOption(skipZipOpt).addOption(overwriteOpt).addOption(verboseOpt).addOption(debugOpt)
-                .addOption(zipAlignPathOpt).addOption(debugSignedOpt).addOption(outOpt);
+                .addOption(zipAlignPathOpt).addOption(outOpt);
 
         return options;
     }
