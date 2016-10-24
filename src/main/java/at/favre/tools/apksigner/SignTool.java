@@ -25,10 +25,10 @@ public class SignTool {
 
     private static void execute(Arg arguments) {
         List<CmdUtil.Result> executedCommands = new ArrayList<>();
+        ZipAlignExecutor zipAlignExecutor = null;
+        SigningConfigGen signingConfigGen = null;
 
         try {
-            ZipAlignExecutor zipAlignExecutor = null;
-            SigningConfigGen signingConfigGen = null;
             File argApkFile = new File(arguments.apkFile);
             File outFolder;
             List<File> targetApkFiles = new ArrayList<>();
@@ -115,13 +115,6 @@ public class SignTool {
                 file.delete();
             }
 
-            if (zipAlignExecutor != null) {
-                zipAlignExecutor.cleanUp();
-            }
-
-            if (signingConfigGen != null) {
-                signingConfigGen.cleanUp();
-            }
 
             log(String.format(Locale.US, "\n[%s] Successfully processed %d APKs with %d having errors in %.2f seconds.", new Date().toString(), successCount, errorCount, (double) (System.currentTimeMillis() - startTime) / 1000.0));
 
@@ -138,6 +131,14 @@ public class SignTool {
                 logErr("Run with '-debug' parameter to get additional information.");
             }
             System.exit(1);
+        } finally {
+            if (zipAlignExecutor != null) {
+                zipAlignExecutor.cleanUp();
+            }
+
+            if (signingConfigGen != null) {
+                signingConfigGen.cleanUp();
+            }
         }
     }
 
@@ -166,7 +167,7 @@ public class SignTool {
                     if (zipAlignResult.success()) {
                         logMsg += "aligned & ";
                     } else {
-                        logMsg += "could not align";
+                        logMsg += "could not align ";
                     }
                 }
 

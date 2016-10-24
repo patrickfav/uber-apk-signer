@@ -56,9 +56,8 @@ public class SigningConfigGen {
 
             if (debugKeystore == null) {
                 try {
-                    File embeddedDebugKeystore = new File(getClass().getClassLoader().getResource(DEBUG_KEYSTORE).getFile());
-                    tempDebugFile = File.createTempFile("temp_", "_" + embeddedDebugKeystore.getName());
-                    Files.copy(embeddedDebugKeystore.toPath(), tempDebugFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    tempDebugFile = File.createTempFile("temp_", "_" + DEBUG_KEYSTORE);
+                    Files.copy(getClass().getClassLoader().getResourceAsStream(DEBUG_KEYSTORE), tempDebugFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     location = SigningConfig.KeystoreLocation.DEBUG_EMBEDDED;
                     debugKeystore = tempDebugFile;
                 } catch (Exception e) {

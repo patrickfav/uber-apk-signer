@@ -40,25 +40,29 @@ public class ZipAlignExecutor {
                 if (zipAlignExecutable == null) {
                     CmdUtil.OS osType = CmdUtil.getOsType();
 
-                    File embeddedZipAlign;
 
+                    String fileName;
                     if (osType == CmdUtil.OS.WIN) {
-                        embeddedZipAlign = new File(getClass().getClassLoader().getResource("win-zipalign-24_0_3.exe").getFile());
+                        fileName = "win-zipalign-24_0_3.exe";
                     } else if (osType == CmdUtil.OS.MAC) {
-                        embeddedZipAlign = new File(getClass().getClassLoader().getResource("mac-zipalign-24_0_3").getFile());
+                        fileName = "mac-zipalign-24_0_3";
                     } else {
-                        embeddedZipAlign = new File(getClass().getClassLoader().getResource("linux-zipalign-24_0_3").getFile());
+                        fileName = "linux-zipalign-24_0_3";
                     }
 
-                    File tempLocation = File.createTempFile("temp_", "_" + embeddedZipAlign.getName());
-                    Files.copy(embeddedZipAlign.toPath(), tempLocation.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    File tempLocation = File.createTempFile("temp_", "_" + fileName);
+                    Files.copy(getClass().getClassLoader().getResourceAsStream(fileName), tempLocation.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+                    if (osType != CmdUtil.OS.WIN) {
+                        CmdUtil.runCmd(new String[]{"chmod", "+x", tempLocation.getAbsolutePath()});
+                    }
 
                     zipAlignExecutable = new String[]{tempLocation.getAbsolutePath()};
                     location = Location.BUILT_IN;
                 }
             }
         } catch (Exception e) {
-            throw new IllegalStateException("could not find location for zipaligne: " + e.getMessage(), e);
+            throw new IllegalStateException("could not find location for zipalign: " + e.getMessage(), e);
         }
     }
 
