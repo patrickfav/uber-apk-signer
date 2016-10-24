@@ -22,13 +22,6 @@ public class CLIParserTest {
     }
 
     @Test
-    public void testWithKeystore() throws Exception {
-        Arg parsedArg = CLIParser.parse(asArgArray("-" + CLIParser.ARG_APK_FILE + " ./ --ks my-keystore.jks"));
-        Arg expectedArg = new Arg("./", null, "my-keystore.jks", null, null, null, false, false, false, false, false, false, null);
-        assertEquals(expectedArg, parsedArg);
-    }
-
-    @Test
     public void testWithKeystoreAndAlias() throws Exception {
         Arg parsedArg = CLIParser.parse(asArgArray("-" + CLIParser.ARG_APK_FILE + " ./ --ks my-keystore.jks --ksAlias debugAlias"));
         Arg expectedArg = new Arg("./", null, "my-keystore.jks", null, null, "debugAlias", false, false, false, false, false, false, null);
