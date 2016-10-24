@@ -8,9 +8,12 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
 public class ZipAlignExecutor {
+    private enum Location {CUSTOM, PATH, BUILT_IN}
+
     public static final String ZIPALIGN_NAME = "zipalign";
 
     public String[] zipAlignExecutable;
+    private Location location;
     private File tempLocation;
 
     public ZipAlignExecutor(Arg arg) {
@@ -23,12 +26,15 @@ public class ZipAlignExecutor {
                 File passedPath = new File(arg.zipAlignPath);
                 if (passedPath.exists() && passedPath.isFile()) {
                     zipAlignExecutable = new String[]{new File(arg.zipAlignPath).getAbsolutePath()};
+                    location = Location.CUSTOM;
                 }
             } else {
                 File pathFile = CmdUtil.checkAndGetFromPATHEnvVar(ZIPALIGN_NAME);
 
                 if (pathFile != null) {
                     zipAlignExecutable = new String[]{pathFile.getAbsolutePath()};
+                    location = Location.PATH;
+                    return;
                 }
 
                 if (zipAlignExecutable == null) {
@@ -48,6 +54,7 @@ public class ZipAlignExecutor {
                     Files.copy(embeddedZipAlign.toPath(), tempLocation.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
                     zipAlignExecutable = new String[]{tempLocation.getAbsolutePath()};
+                    location = Location.BUILT_IN;
                 }
             }
         } catch (Exception e) {
@@ -64,5 +71,10 @@ public class ZipAlignExecutor {
             tempLocation.delete();
             tempLocation = null;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Using zipalign location " + location + ".";
     }
 }

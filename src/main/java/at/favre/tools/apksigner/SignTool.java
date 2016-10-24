@@ -27,7 +27,7 @@ public class SignTool {
         List<CmdUtil.Result> executedCommands = new ArrayList<>();
 
         try {
-            ZipAlignExecutor executor = null;
+            ZipAlignExecutor zipAlignExecutor = null;
             SigningConfigGen signingConfigGen = null;
             File argApkFile = new File(arguments.apkFile);
             File outFolder;
@@ -58,10 +58,12 @@ public class SignTool {
             }
 
             if (!arguments.skipZipAlign) {
-                executor = new ZipAlignExecutor(arguments);
+                zipAlignExecutor = new ZipAlignExecutor(arguments);
+                log(zipAlignExecutor.toString());
             }
             if (!arguments.onlyVerify) {
                 signingConfigGen = new SigningConfigGen(arguments);
+                log("Using keystore mode " + signingConfigGen.signingConfig.location + ".");
             }
 
             long startTime = System.currentTimeMillis();
@@ -71,30 +73,32 @@ public class SignTool {
             List<File> tempFilesToDelete = new ArrayList<>();
             for (File targetApkFile : targetApkFiles) {
                 if (targetApkFile.isFile() && FileUtil.getFileExtension(targetApkFile).toLowerCase().equals("apk")) {
+                    File rootSource = targetApkFile;
+
                     log("\n\r" + targetApkFile.getName());
                     if (arguments.dryRun) {
                         log("\t - (skip)");
                     }
 
-                    if (!arguments.onlyVerify && verify(targetApkFile, false, true)) {
+                    if (!arguments.onlyVerify && verify(targetApkFile, rootSource, false, true)) {
                         logErr("\t - already signed SKIP");
                         errorCount++;
                         continue;
                     }
 
                     if (!arguments.onlyVerify) {
-                        targetApkFile = zipAlign(false, targetApkFile, outFolder, executor, arguments, executedCommands);
+                        targetApkFile = zipAlign(false, targetApkFile, rootSource, outFolder, zipAlignExecutor, arguments, executedCommands);
 
                         if (targetApkFile == null) {
                             throw new IllegalStateException("zipalign was not verified - this is very strange - maybe no read auth?");
                         }
 
                         tempFilesToDelete.add(targetApkFile);
-                        targetApkFile = sign(targetApkFile, outFolder, signingConfigGen.signingConfig, arguments);
+                        targetApkFile = sign(targetApkFile, rootSource, outFolder, signingConfigGen.signingConfig, arguments);
                     }
 
-                    boolean zipAlignVerified = arguments.skipZipAlign || zipAlign(true, targetApkFile, outFolder, executor, arguments, executedCommands) != null;
-                    boolean sigVerified = verify(targetApkFile, arguments.verbose, false);
+                    boolean zipAlignVerified = arguments.skipZipAlign || zipAlign(true, targetApkFile, rootSource, outFolder, zipAlignExecutor, arguments, executedCommands) != null;
+                    boolean sigVerified = verify(targetApkFile, rootSource, arguments.verbose, false);
 
                     if (zipAlignVerified && sigVerified) {
                         successCount++;
@@ -111,8 +115,8 @@ public class SignTool {
                 file.delete();
             }
 
-            if (executor != null) {
-                executor.cleanUp();
+            if (zipAlignExecutor != null) {
+                zipAlignExecutor.cleanUp();
             }
 
             if (signingConfigGen != null) {
@@ -137,7 +141,7 @@ public class SignTool {
         }
     }
 
-    private static File zipAlign(boolean onlyVerify, File targetApkFile, File outFolder, ZipAlignExecutor executor, Arg arguments, List<CmdUtil.Result> cmdList) {
+    private static File zipAlign(boolean onlyVerify, File targetApkFile, File rootTargetFile, File outFolder, ZipAlignExecutor executor, Arg arguments, List<CmdUtil.Result> cmdList) {
         if (!arguments.skipZipAlign) {
             File outFile = targetApkFile;
             if (!onlyVerify) {
@@ -175,10 +179,14 @@ public class SignTool {
 
                 }
 
+                if (!rootTargetFile.equals(outFile) || !zipAlignVerifyResult.success()) {
+                    logMsg += " (" + outFile.getName() + ")";
+                }
+
                 if (zipAlignVerifyResult.success()) {
-                    log(logMsg + " (" + outFile.getName() + ")");
+                    log(logMsg);
                 } else {
-                    logErr(logMsg + " (" + outFile.getName() + ")");
+                    logErr(logMsg);
                 }
 
                 return zipAlignVerifyResult.success() ? outFile : null;
@@ -190,7 +198,7 @@ public class SignTool {
         return targetApkFile;
     }
 
-    private static File sign(File targetApkFile, File outFolder, SigningConfig signingConfig, Arg arguments) {
+    private static File sign(File targetApkFile, File rootTargetFile, File outFolder, SigningConfig signingConfig, Arg arguments) {
         try {
             File outFile = targetApkFile;
 
@@ -224,7 +232,15 @@ public class SignTool {
 
             ApkSignerTool.main(argArr);
 
-            log("\t- signed [" + signingConfig.location + "] (" + outFile.getName() + ")");
+            String logMsg = "\t- signed";
+
+
+            if (!rootTargetFile.equals(outFile)) {
+                logMsg += " (" + outFile.getName() + ")";
+            }
+
+            log(logMsg);
+
 
             return outFile;
         } catch (Exception e) {
@@ -232,16 +248,28 @@ public class SignTool {
         }
     }
 
-    private static boolean verify(File targetApkFile, boolean verbose, boolean noLog) {
+    private static boolean verify(File targetApkFile, File rootTargetFile, boolean verbose, boolean noLog) {
         try {
             AndroidApkSignerVerify verifier = new AndroidApkSignerVerify();
             AndroidApkSignerVerify.Result result = verifier.verify(targetApkFile, verbose, null, null, false, verbose);
 
             if (!noLog) {
+                String logMsg;
+
                 if (result.verified) {
-                    log("\t- signature verified (" + targetApkFile.getName() + ")");
+                    logMsg = "\t- signature verified";
                 } else {
-                    logErr("\t- signature VERIFY FAILED (" + targetApkFile.getName() + ")");
+                    logMsg = "\t- signature VERIFY FAILED (" + targetApkFile.getName() + ")";
+                }
+
+                if (!rootTargetFile.equals(targetApkFile)) {
+                    logMsg += " (" + targetApkFile.getName() + ")";
+                }
+
+                if (result.verified) {
+                    log(logMsg);
+                } else {
+                    logErr(logMsg);
                 }
 
                 if (verbose) {

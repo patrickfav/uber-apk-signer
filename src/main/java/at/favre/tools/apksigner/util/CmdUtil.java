@@ -48,7 +48,12 @@ public class CmdUtil {
     }
 
     public static File checkAndGetFromPATHEnvVar(final String matchesExecutable) {
-        String[] pathParts = System.getenv("PATH").split(";");
+        String separator = ":";
+        if (getOsType() == OS.WIN) {
+            separator = ";";
+        }
+
+        String[] pathParts = System.getenv("PATH").split(separator);
         for (String pathPart : pathParts) {
             File pathFile = new File(pathPart);
 
