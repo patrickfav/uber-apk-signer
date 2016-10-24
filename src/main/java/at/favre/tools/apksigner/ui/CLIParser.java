@@ -66,23 +66,23 @@ public class CLIParser {
 
     private static Options setupOptions() {
         Options options = new Options();
-        Option apkPathOpt = Option.builder(ARG_APK_FILE).longOpt("apk").argName("package name").hasArg(true).desc("Filter string that has to be a package name or part of it containing wildcards '*'. Can be multiple filter Strings comma separated. Example: 'com.android.*' or 'com.android.*,com.google.*'").build();
-        Option outOpt = Option.builder("o").longOpt("out").argName("path").hasArg(true).desc("").build();
+        Option apkPathOpt = Option.builder(ARG_APK_FILE).longOpt("apks").argName("file/folder").hasArg(true).desc("Can be a single apk or a folder containing multiple apks. These are used as source for zipalining/signing/verifying").build();
+        Option outOpt = Option.builder("o").longOpt("out").argName("path").hasArg(true).desc("Where the aligned/signed apks will be copied to. Must be a folder. Will generate, if not existent.").build();
 
-        Option ksOpt = Option.builder().longOpt("ks").argName("keystore").hasArg(true).desc("").build();
-        Option ksPassOpt = Option.builder().longOpt("ksPass").argName("password").hasArg(true).desc("").build();
-        Option ksKeyPassOpt = Option.builder().longOpt("ksKeyPass").argName("password").hasArg(true).desc("").build();
-        Option ksAliasOpt = Option.builder().longOpt("ksAlias").argName("alias").hasArg(true).desc("").build();
-        Option zipAlignPathOpt = Option.builder().longOpt("zipAlignPath").argName("path").hasArg(true).desc("").build();
+        Option ksOpt = Option.builder().longOpt("ks").argName("keystore").hasArg(true).desc("The keystore file. If this isn't provided, will try to sign with a debug keystore. The debug keystore will be searched in the same dir as execution and 'user_home/.android' folder. If it is not found there a built-in keystore will be used for convenience.").build();
+        Option ksPassOpt = Option.builder().longOpt("ksPass").argName("password").hasArg(true).desc("The password for the keystore. If this is not provided, caller will get an user prompt to enter it.").build();
+        Option ksKeyPassOpt = Option.builder().longOpt("ksKeyPass").argName("password").hasArg(true).desc("The password for the key. If this is not provided, caller will get an user prompt to enter it.").build();
+        Option ksAliasOpt = Option.builder().longOpt("ksAlias").argName("alias").hasArg(true).desc("The alias of the used key in the keystore. Must be provided if --ks is provided.").build();
+        Option zipAlignPathOpt = Option.builder().longOpt("zipAlignPath").argName("path").hasArg(true).desc("Pass your own zipalign executable. If this is omitted the built-in version is used (available for win, mac and linux)").build();
 
-        Option verifyOnlyOpt = Option.builder().longOpt(ARG_VERIFY).hasArg(false).desc("").build();
-        Option dryRunOpt = Option.builder().longOpt("dryRun").hasArg(false).desc("").build();
-        Option skipZipOpt = Option.builder().longOpt("skipZipAlign").hasArg(false).desc("Skips zipAlign process.").build();
-        Option overwriteOpt = Option.builder().longOpt("overwrite").hasArg(false).desc("Will overwrite/delete the unsigned apks").build();
+        Option verifyOnlyOpt = Option.builder().longOpt(ARG_VERIFY).hasArg(false).desc("If this is passed, the signature and alignment is only verified.").build();
+        Option dryRunOpt = Option.builder().longOpt("dryRun").hasArg(false).desc("Check what apks would be processed").build();
+        Option skipZipOpt = Option.builder().longOpt("skipZipAlign").hasArg(false).desc("Skips zipAlign process. Also affects verify.").build();
+        Option overwriteOpt = Option.builder().longOpt("overwrite").hasArg(false).desc("Will overwrite/delete the apks in-place").build();
         Option verboseOpt = Option.builder().longOpt("verbose").hasArg(false).desc("Prints more output, especially useful for sign verify.").build();
         Option debugOpt = Option.builder().longOpt("debug").hasArg(false).desc("Prints additional info for debugging.").build();
 
-        Option help = Option.builder("h").longOpt("help").desc("Prints docs").build();
+        Option help = Option.builder("h").longOpt("help").desc("Prints help docs.").build();
         Option version = Option.builder("v").longOpt("version").desc("Prints current version.").build();
 
         OptionGroup mainArgs = new OptionGroup();
