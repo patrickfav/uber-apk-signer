@@ -49,6 +49,10 @@ public class CLIParser {
                 throw new IllegalArgumentException("must provide keystore file if any keystore config is given");
             }
 
+            if (argument.ksFile != null && argument.ksAliasName == null) {
+                throw new IllegalArgumentException("must provide alias if keystore is given");
+            }
+
             if (argument.overwrite && argument.out != null) {
                 throw new IllegalArgumentException("either provide out path or overwrite argument, cannot process both");
             }
@@ -80,7 +84,7 @@ public class CLIParser {
         Option skipZipOpt = Option.builder().longOpt("skipZipAlign").hasArg(false).desc("Skips zipAlign process. Also affects verify.").build();
         Option overwriteOpt = Option.builder().longOpt("overwrite").hasArg(false).desc("Will overwrite/delete the apks in-place").build();
         Option verboseOpt = Option.builder().longOpt("verbose").hasArg(false).desc("Prints more output, especially useful for sign verify.").build();
-        Option debugOpt = Option.builder().longOpt("debug").hasArg(false).desc("Prints additional info for debugging.").build();
+        Option debugOpt = Option.builder().longOpt("debug").hasArg(false).desc("Prints additional subjectAndIssuerDn for debugging.").build();
 
         Option help = Option.builder("h").longOpt("help").desc("Prints help docs.").build();
         Option version = Option.builder("v").longOpt("version").desc("Prints current version.").build();

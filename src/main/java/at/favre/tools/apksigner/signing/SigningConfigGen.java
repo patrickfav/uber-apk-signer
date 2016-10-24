@@ -6,6 +6,7 @@ import at.favre.tools.apksigner.util.CmdUtil;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Scanner;
 
 public class SigningConfigGen {
 
@@ -81,6 +82,15 @@ public class SigningConfigGen {
 
             if (arguments.ksAliasName == null || arguments.ksAliasName.trim().isEmpty()) {
                 throw new IllegalArgumentException("when you provide your own keystore you must pass the keystore alias name");
+            }
+
+            if (arguments.ksPass == null) {
+                Scanner s = new Scanner(System.in);
+                System.out.println("Please provide the keystore password for '" + arguments.ksFile + "':");
+                arguments.ksPass = s.next();
+
+                System.out.println("Please provide the key password for alias '" + arguments.ksAliasName + "':");
+                arguments.ksKeyPass = s.next();
             }
 
             return new SigningConfig(

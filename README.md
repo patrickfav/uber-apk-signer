@@ -1,16 +1,17 @@
 # Uber Apk Signer
-A tool that helps signing and zip aligning multiple files with either debug or provided release certificatas
+A tool that helps signing and zip aligning multiple APKs with either debug or provided release certificates. It supports v1 and v2 Android signing scheme. Easy debug signing with embedded debug keystore. Automatically verifies signature and zipalign after every signing.
 
 Main features:
 
 * zipalign, signing and verifying of multiple APKs in one step
+* verify signature and zipalign of multiple APKs in one step
 * built-in zipalign & debug keystore for convenient usage
-* supports v1 and v2 android apk singing scheme with using the original android `apksigner.jar` from android sdk (see https://source.android.com/security/apksigning/v2.html)
+* supports v1 and v2 android apk singing scheme
+* crypto/signing code relied upon official implementation
 
 Basic usage:
 
-    java -jar uber-apk-signer.jar -a /path/to/apks
-
+    java -jar uber-apk-signer.jar --apks /path/to/apks
 
 This should run on any Windows, Mac or Linux machine where Java8+ is installed. 
 
@@ -43,7 +44,7 @@ This should run on any Windows, Mac or Linux machine where Java8+ is installed.
        --zipAlignPath <path>    Pass your own zipalign executable. If this is omitted the built-in version is
                                 used (available for win, mac and linux)
 
-Provide your own out directory
+Provide your own out directory for signed apks
 
     java -jar uber-apk-signer.jar -a /path/to/apks --out /path/to/apks/out
 
@@ -58,6 +59,28 @@ Sign with your own release keystore
 Provide your own zipalign executable
 
     java -jar uber-apk-signer.jar -a /path/to/apks --zipAlignPath /sdk/build-tools/24.0.3/zipalign
+
+### Debug Signing Mode
+
+If no keystore is provided the tool will try to automatically sign with a debug keystore. It will try to find on in the following locations (descending order):
+
+* `debug.keystore` in the same directory as the jar executable
+* `debug.keystore` found in the `/user_home/.android` folder
+* Embedded `debug.keystore` packaged with the jar executable
+
+A log message will indicate which one was chosen.
+
+### Zipalign Executable
+
+[`Zipalign`](https://developer.android.com/studio/command-line/zipalign.html) is a tool developed by Google to optimize zips (apks). It is needed if you want to upload it to the Playstore otherwise it is optional. By default this tool will try to zipalign the apk, therefore it will need the location of the executable. If the path isn't passed in the command line interface, the tool checks if it is in `PATH` environment variable, otherwise it will try to use an embedded version of zipalign. 
+
+If `--skipZipAlign` is passed no executable is needed.
+
+### v1 and v2 Signing Scheme
+
+[Android 7.0 introduces APK Signature Scheme v2](https://developer.android.com/about/versions/nougat/android-7.0.html#apk_signature_v2), a new app-signing scheme that offers faster app install times and more protection against unauthorized alterations to APK files. By default, Android Studio 2.2 and the Android Plugin for Gradle 2.2 sign your app using both APK Signature Scheme v2 and the traditional signing scheme, which uses JAR signing.
+
+[APK Signature Scheme v2 is a whole-file signature scheme](https://source.android.com/security/apksigning/v2.html) that increases verification speed and strengthens integrity guarantees by detecting any changes to the protected parts of the APK. The older jarsigning is called v1 schema.
 
 ## Build
 

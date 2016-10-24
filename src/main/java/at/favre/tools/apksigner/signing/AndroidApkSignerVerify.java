@@ -12,14 +12,17 @@ import java.security.interfaces.DSAKey;
 import java.security.interfaces.DSAParams;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.RSAKey;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 public class AndroidApkSignerVerify {
     private static final char[] HEX_DIGITS = "0123456789abcdef".toCharArray();
 
-    public Result verify(File apk, boolean verbose, Integer minSdkVersion, Integer maxSdkVersion, boolean warningsTreatedAsErrors, boolean printCerts) throws Exception {
+    public Result verify(File apk, Integer minSdkVersion, Integer maxSdkVersion, boolean warningsTreatedAsErrors) throws Exception {
         StringBuilder logMsg = new StringBuilder();
+        List<CertInfo> certInfoList = new ArrayList<>();
 
         if (maxSdkVersion == null) {
             maxSdkVersion = Integer.MAX_VALUE;
@@ -41,63 +44,64 @@ public class AndroidApkSignerVerify {
             throw new IllegalStateException("Min API Level (" + minSdkVersion + ") > max API Level (" + maxSdkVersion + ")");
         }
 
-        ApkVerifier.Result result = (new ApkVerifier.Builder(apk)).setCheckedPlatformVersions(minSdkVersion, maxSdkVersion).build().verify();
-        boolean verified = result.isVerified();
+        ApkVerifier.Result apkVerifierResult = (new ApkVerifier.Builder(apk)).setCheckedPlatformVersions(minSdkVersion, maxSdkVersion).build().verify();
+        boolean verified = apkVerifierResult.isVerified();
         boolean warningsEncountered = false;
         Iterator iter;
         if (verified) {
-            List warningsOut = result.getSignerCertificates();
-            if (verbose) {
-                logMsg.append("Verifies\n");
-                logMsg.append("Verified using v1 scheme (JAR signing): ").append(result.isVerifiedUsingV1Scheme());
-                logMsg.append("Verified using v2 scheme (APK Signature Scheme v2): ").append(result.isVerifiedUsingV2Scheme());
-                logMsg.append("Number of signers: ").append(warningsOut.size());
-            }
+            List signerCertificates = apkVerifierResult.getSignerCertificates();
+            logMsg.append("Verifies\n");
+            logMsg.append("Verified using v1 scheme (JAR signing): ").append(apkVerifierResult.isVerifiedUsingV1Scheme());
+            logMsg.append("Verified using v2 scheme (APK Signature Scheme v2): ").append(apkVerifierResult.isVerifiedUsingV2Scheme());
+            logMsg.append("Number of signers: ").append(signerCertificates.size());
 
-            if (printCerts) {
-                int error = 0;
-                MessageDigest signer = MessageDigest.getInstance("SHA-256\n");
-                MessageDigest signerName = MessageDigest.getInstance("SHA-1\n");
-                iter = warningsOut.iterator();
+            MessageDigest sha256Digners = MessageDigest.getInstance("SHA-256");
+            MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
+            iter = signerCertificates.iterator();
 
-                while (iter.hasNext()) {
-                    X509Certificate warning = (X509Certificate) iter.next();
-                    ++error;
-                    logMsg.append("Signer #").append(error).append(" certificate DN").append(": ").append(warning.getSubjectDN()).append("\n");
-                    byte[] encodedCert = warning.getEncoded();
-                    logMsg.append("Signer #").append(error).append(" certificate SHA-256 digest: ").append(encode(signer.digest(encodedCert))).append("\n");
-                    logMsg.append("Signer #").append(error).append(" certificate SHA-1 digest: ").append(encode(signerName.digest(encodedCert))).append("\n");
-                    if (verbose) {
-                        PublicKey publicKey = warning.getPublicKey();
-                        logMsg.append("Signer #").append(error).append(" key algorithm: ").append(publicKey.getAlgorithm()).append("\n");
-                        int keySize = -1;
-                        if (publicKey instanceof RSAKey) {
-                            keySize = ((RSAKey) publicKey).getModulus().bitLength();
-                        } else if (publicKey instanceof ECKey) {
-                            keySize = ((ECKey) publicKey).getParams().getOrder().bitLength();
-                        } else if (publicKey instanceof DSAKey) {
-                            DSAParams encodedKey = ((DSAKey) publicKey).getParams();
-                            if (encodedKey != null) {
-                                keySize = encodedKey.getP().bitLength();
-                            }
-                        }
+            while (iter.hasNext()) {
+                CertInfo certInfo = new CertInfo();
 
-                        logMsg.append("Signer #").append(error).append(" key size (bits): ").append(keySize != -1 ? String.valueOf(keySize) : "n/a").append("\n");
-                        byte[] pubKey = publicKey.getEncoded();
-                        logMsg.append("Signer #").append(error).append(" public key SHA-256 digest: ").append(encode(signer.digest(pubKey))).append("\n");
-                        logMsg.append("Signer #").append(error).append(" public key SHA-1 digest: ").append(encode(signerName.digest(pubKey))).append("\n");
+                X509Certificate x509Certificate = (X509Certificate) iter.next();
+                byte[] encodedCert = x509Certificate.getEncoded();
+
+                certInfo.subjectAndIssuerDn = "Subject: " + x509Certificate.getSubjectDN().toString() + " / Issuer: " + x509Certificate.getIssuerDN();
+                certInfo.sigAlgo = x509Certificate.getSigAlgName();
+                certInfo.certSha1 = encode(sha1Digest.digest(encodedCert));
+                certInfo.certSha256 = encode(sha256Digners.digest(encodedCert));
+                certInfo.expiry = x509Certificate.getNotAfter();
+                certInfo.beginValidity = x509Certificate.getNotBefore();
+
+                PublicKey publicKey = x509Certificate.getPublicKey();
+
+                certInfo.pubAlgo = publicKey.getAlgorithm();
+                int keySize = -1;
+                if (publicKey instanceof RSAKey) {
+                    keySize = ((RSAKey) publicKey).getModulus().bitLength();
+                } else if (publicKey instanceof ECKey) {
+                    keySize = ((ECKey) publicKey).getParams().getOrder().bitLength();
+                } else if (publicKey instanceof DSAKey) {
+                    DSAParams encodedKey = ((DSAKey) publicKey).getParams();
+                    if (encodedKey != null) {
+                        keySize = encodedKey.getP().bitLength();
                     }
                 }
+
+                certInfo.pubKeysize = keySize;
+                byte[] pubKey = publicKey.getEncoded();
+                certInfo.pubSha1 = encode(sha1Digest.digest(pubKey));
+                certInfo.pubSha256 = encode(sha256Digners.digest(pubKey));
+                certInfoList.add(certInfo);
             }
         } else {
             logMsg.append("DOES NOT VERIFY\n");
         }
 
-        for (Object error : result.getErrors()) {
+        for (Object error : apkVerifierResult.getErrors()) {
             logMsg.append("ERROR: " + error).append("\n");
         }
 
-        Iterator warningIter = result.getWarnings().iterator();
+        Iterator warningIter = apkVerifierResult.getWarnings().iterator();
 
         while (warningIter.hasNext()) {
             ApkVerifier.IssueWithParams var29 = (ApkVerifier.IssueWithParams) warningIter.next();
@@ -105,7 +109,7 @@ public class AndroidApkSignerVerify {
             logMsg.append("WARNING: ").append(var29).append("\n");
         }
 
-        warningIter = result.getV1SchemeSigners().iterator();
+        warningIter = apkVerifierResult.getV1SchemeSigners().iterator();
 
         String var32;
         ApkVerifier.IssueWithParams var33;
@@ -130,7 +134,7 @@ public class AndroidApkSignerVerify {
             }
         }
 
-        warningIter = result.getV2SchemeSigners().iterator();
+        warningIter = apkVerifierResult.getV2SchemeSigners().iterator();
 
         while (warningIter.hasNext()) {
             ApkVerifier.Result.V2SchemeSignerInfo var31 = (ApkVerifier.Result.V2SchemeSignerInfo) warningIter.next();
@@ -152,10 +156,10 @@ public class AndroidApkSignerVerify {
         }
 
         if (!verified || warningsTreatedAsErrors && warningsEncountered) {
-            return new Result(false, logMsg.toString());
+            return new Result(false, logMsg.toString(), apkVerifierResult.isVerifiedUsingV1Scheme(), apkVerifierResult.isVerifiedUsingV2Scheme(), certInfoList);
         }
 
-        return new Result(true, logMsg.toString());
+        return new Result(true, logMsg.toString(), apkVerifierResult.isVerifiedUsingV1Scheme(), apkVerifierResult.isVerifiedUsingV2Scheme(), certInfoList);
     }
 
     private static String encode(byte[] data, int offset, int length) {
@@ -177,10 +181,29 @@ public class AndroidApkSignerVerify {
     public static class Result {
         public final boolean verified;
         public final String log;
+        public final boolean v1Schema;
+        public final boolean v2Schema;
+        public final List<CertInfo> certInfoList;
 
-        public Result(boolean verified, String log) {
+        public Result(boolean verified, String log, boolean v1Schema, boolean v2Schema, List<CertInfo> certInfoList) {
             this.verified = verified;
             this.log = log;
+            this.v1Schema = v1Schema;
+            this.v2Schema = v2Schema;
+            this.certInfoList = certInfoList;
         }
+    }
+
+    public static class CertInfo {
+        public String certSha1;
+        public String certSha256;
+        public String pubSha1;
+        public String pubSha256;
+        public String subjectAndIssuerDn;
+        public String sigAlgo;
+        public String pubAlgo;
+        public int pubKeysize;
+        public Date expiry;
+        public Date beginValidity;
     }
 }

@@ -20,4 +20,12 @@ public class SigningConfig {
         this.ksPass = ksPass;
         this.ksKeyPass = ksKeyPass;
     }
+
+    public String description() {
+        String desc = "Using keystore mode " + location + ".";
+        if (location == KeystoreLocation.RELEASE_CUSTOM) {
+            desc += " (" + keystore.getAbsolutePath() + ")";
+        }
+        return desc;
+    }
 }

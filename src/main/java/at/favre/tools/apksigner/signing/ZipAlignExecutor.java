@@ -62,7 +62,7 @@ public class ZipAlignExecutor {
                 }
             }
         } catch (Exception e) {
-            throw new IllegalStateException("could not find location for zipalign: " + e.getMessage(), e);
+            throw new IllegalStateException("Could not find location for zipalign. Try to set it in PATH or use the --zipAlignPath argument. Optionally you could skip zipalign with --skipZipAlign. " + e.getMessage(), e);
         }
     }
 
