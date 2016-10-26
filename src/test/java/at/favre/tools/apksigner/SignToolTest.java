@@ -3,6 +3,7 @@ package at.favre.tools.apksigner;
 import at.favre.tools.apksigner.signing.AndroidApkSignerVerify;
 import at.favre.tools.apksigner.ui.CLIParser;
 import at.favre.tools.apksigner.ui.CLIParserTest;
+import at.favre.tools.apksigner.util.FileUtil;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -12,6 +13,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static junit.framework.TestCase.*;
@@ -51,22 +53,15 @@ public class SignToolTest {
         List<File> uApks = copyToTestPath(originalFolder, unsingedApks);
 
         String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN;
-        System.out.println(cmd);
-
-        SignTool.main(CLIParserTest.asArgArray(cmd));
-        assertSigned(outFolder, uApks);
+        testAndCheck(cmd, outFolder, uApks);
     }
 
     @Test
     public void testSignSingleApk() throws Exception {
         List<File> uApks = copyToTestPath(originalFolder, unsingedApks.subList(0, 1));
-
+        System.out.println("found " + uApks.size() + " apks in out folder");
         String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.listFiles()[0].getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN;
-
-        System.out.println(cmd);
-
-        SignTool.main(CLIParserTest.asArgArray(cmd));
-        assertSigned(outFolder, uApks);
+        testAndCheck(cmd, outFolder, uApks);
     }
 
     @Test
@@ -74,15 +69,74 @@ public class SignToolTest {
         List<File> uApks = copyToTestPath(originalFolder, unsingedApks);
 
         String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN + " --ks " + testReleaseKs.getAbsolutePath() + " --ksPass " + ksPass + " --ksKeyPass " + keyPass + " --ksAlias " + ksAlias;
+        testAndCheck(cmd, outFolder, uApks);
+    }
+
+    @Test
+    public void testNoApksGiven() throws Exception {
+        copyToTestPath(originalFolder, Collections.singletonList(testReleaseKs));
+
+        String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN;
+        testAndCheck(cmd, outFolder, Collections.emptyList());
+    }
+
+    @Test
+    public void testSignMultiApkWithZipalign() throws Exception {
+        List<File> uApks = copyToTestPath(originalFolder, unsingedApks);
+
+        String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath();
+        testAndCheck(cmd, outFolder, uApks);
+    }
+
+    @Test
+    public void testVerify() throws Exception {
+        copyToTestPath(originalFolder, singedApks);
+        String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " --" + CLIParser.ARG_VERIFY + " --" + CLIParser.ARG_SKIP_ZIPALIGN;
+        System.out.println(cmd);
+        SignTool.Result result = SignTool.mainExecute(CLIParserTest.asArgArray(cmd));
+
+        assertNotNull(result);
+        assertEquals(0, result.unsuccessful);
+        assertEquals(singedApks.size(), result.success);
+    }
+
+    @Test
+    public void testVerifySingleApk() throws Exception {
+        copyToTestPath(originalFolder, singedApks.subList(0, 1));
+        String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.listFiles()[0].getAbsolutePath() + " --" + CLIParser.ARG_VERIFY + " --" + CLIParser.ARG_SKIP_ZIPALIGN;
         System.out.println(cmd);
 
-        SignTool.main(CLIParserTest.asArgArray(cmd));
-        assertSigned(outFolder, uApks);
+        SignTool.Result result = SignTool.mainExecute(CLIParserTest.asArgArray(cmd));
+        assertNotNull(result);
+        assertEquals(0, result.unsuccessful);
+        assertEquals(1, result.success);
+    }
+
+    @Test
+    public void testVerifyShouldNotBe() throws Exception {
+        copyToTestPath(originalFolder, unsingedApks);
+        String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " --" + CLIParser.ARG_VERIFY + " --" + CLIParser.ARG_SKIP_ZIPALIGN;
+        System.out.println(cmd);
+
+        SignTool.Result result = SignTool.mainExecute(CLIParserTest.asArgArray(cmd));
+        assertNotNull(result);
+        assertEquals(unsingedApks.size(), result.unsuccessful);
+        assertEquals(0, result.success);
+    }
+
+    private static void testAndCheck(String cmd, File outFolder, List<File> copyApks) throws Exception {
+        System.out.println(cmd);
+        SignTool.Result result = SignTool.mainExecute(CLIParserTest.asArgArray(cmd));
+        assertNotNull(result);
+        assertEquals(0, result.unsuccessful);
+        assertEquals(copyApks.size(), result.success);
+        assertSigned(outFolder, copyApks);
     }
 
     private static void assertSigned(File outFolder, List<File> uApks) throws Exception {
         assertNotNull(outFolder);
-        File[] outFiles = outFolder.listFiles();
+        File[] outFiles = outFolder.listFiles(pathname -> FileUtil.getFileExtension(pathname).toLowerCase().equals("apk"));
+        System.out.println("Found " + outFiles.length + " apks in out dir");
         assertNotNull(outFiles);
         assertEquals("should be same count of apks in out folder", uApks.size(), outFiles.length);
 

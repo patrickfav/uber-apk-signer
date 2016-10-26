@@ -16,17 +16,28 @@ import java.util.*;
 public class SignTool {
 
     public static void main(String[] args) {
-        Arg arguments = CLIParser.parse(args);
-
-        if (arguments != null) {
-            execute(arguments);
+        Result result = mainExecute(args);
+        if (result != null && result.error) {
+            System.exit(1);
         }
     }
 
-    private static void execute(Arg arguments) {
+    static Result mainExecute(String[] args) {
+        Arg arguments = CLIParser.parse(args);
+
+        if (arguments != null) {
+            return execute(arguments);
+        }
+        return null;
+    }
+
+    private static Result execute(Arg arguments) {
         List<CmdUtil.Result> executedCommands = new ArrayList<>();
         ZipAlignExecutor zipAlignExecutor = null;
         SigningConfigGen signingConfigGen = null;
+
+        int successCount = 0;
+        int errorCount = 0;
 
         try {
             File argApkFile = new File(arguments.apkFile);
@@ -67,8 +78,7 @@ public class SignTool {
             }
 
             long startTime = System.currentTimeMillis();
-            int successCount = 0;
-            int errorCount = 0;
+
             int iterCount = 0;
 
             List<File> tempFilesToDelete = new ArrayList<>();
@@ -141,7 +151,7 @@ public class SignTool {
             } else {
                 logErr("Run with '-debug' parameter to get additional information.");
             }
-            System.exit(1);
+            return new Result(true, successCount, errorCount);
         } finally {
             if (zipAlignExecutor != null) {
                 zipAlignExecutor.cleanUp();
@@ -151,6 +161,7 @@ public class SignTool {
                 signingConfigGen.cleanUp();
             }
         }
+        return new Result(false, successCount, errorCount);
     }
 
     private static File zipAlign(File targetApkFile, File rootTargetFile, File outFolder, ZipAlignExecutor executor, Arg arguments, List<CmdUtil.Result> cmdList) {
@@ -335,6 +346,18 @@ public class SignTool {
             logErr(logMsg);
         } else {
             log(logMsg);
+        }
+    }
+
+    public static class Result {
+        public final boolean error;
+        public final int success;
+        public final int unsuccessful;
+
+        public Result(boolean error, int success, int unsuccessful) {
+            this.error = error;
+            this.success = success;
+            this.unsuccessful = unsuccessful;
         }
     }
 }
