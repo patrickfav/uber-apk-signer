@@ -16,7 +16,7 @@ public class CLIParserTest {
 
     @Test
     public void testWithOut() throws Exception {
-        Arg parsedArg = CLIParser.parse(asArgArray("-" + CLIParser.ARG_APK_FILE + " ./ --out ./test"));
+        Arg parsedArg = CLIParser.parse(asArgArray("-" + CLIParser.ARG_APK_FILE + " ./ -" + CLIParser.ARG_APK_OUT + " ./test"));
         Arg expectedArg = new Arg("./", "./test", null, null, null, null, false, false, false, false, false, false, null);
         assertEquals(expectedArg, parsedArg);
     }
@@ -51,7 +51,7 @@ public class CLIParserTest {
 
     @Test
     public void testWithSkipZipAlign() throws Exception {
-        Arg parsedArg = CLIParser.parse(asArgArray("-" + CLIParser.ARG_APK_FILE + "./ --skipZipAlign"));
+        Arg parsedArg = CLIParser.parse(asArgArray("-" + CLIParser.ARG_APK_FILE + "./ --" + CLIParser.ARG_SKIP_ZIPALIGN));
         Arg expectedArg = new Arg("./", null, null, null, null, null, false, false, false, true, false, false, null);
         assertEquals(expectedArg, parsedArg);
     }

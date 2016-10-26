@@ -23,6 +23,7 @@ public class AndroidApkSignerVerify {
     public Result verify(File apk, Integer minSdkVersion, Integer maxSdkVersion, boolean warningsTreatedAsErrors) throws Exception {
         StringBuilder logMsg = new StringBuilder();
         List<CertInfo> certInfoList = new ArrayList<>();
+        int warningCount = 0;
 
         if (maxSdkVersion == null) {
             maxSdkVersion = Integer.MAX_VALUE;
@@ -106,6 +107,7 @@ public class AndroidApkSignerVerify {
         while (warningIter.hasNext()) {
             ApkVerifier.IssueWithParams var29 = (ApkVerifier.IssueWithParams) warningIter.next();
             warningsEncountered = true;
+            warningCount++;
             logMsg.append("WARNING: ").append(var29).append("\n");
         }
 
@@ -129,6 +131,7 @@ public class AndroidApkSignerVerify {
             while (iter.hasNext()) {
                 var33 = (ApkVerifier.IssueWithParams) iter.next();
                 warningsEncountered = true;
+                warningCount++;
                 logMsg.append("WARNING: JAR signer ").append(var32).append(": ").append(var33).append("\n");
 
             }
@@ -137,29 +140,30 @@ public class AndroidApkSignerVerify {
         warningIter = apkVerifierResult.getV2SchemeSigners().iterator();
 
         while (warningIter.hasNext()) {
-            ApkVerifier.Result.V2SchemeSignerInfo var31 = (ApkVerifier.Result.V2SchemeSignerInfo) warningIter.next();
-            var32 = "signer #" + (var31.getIndex() + 1);
-            iter = var31.getErrors().iterator();
+            ApkVerifier.Result.V2SchemeSignerInfo warningsInfo = (ApkVerifier.Result.V2SchemeSignerInfo) warningIter.next();
+            var32 = "signer #" + (warningsInfo.getIndex() + 1);
+            iter = warningsInfo.getErrors().iterator();
 
             while (iter.hasNext()) {
                 var33 = (ApkVerifier.IssueWithParams) iter.next();
                 logMsg.append("ERROR: APK Signature Scheme v2 ").append(var32).append(": ").append(var33).append("\n");
             }
 
-            iter = var31.getWarnings().iterator();
+            iter = warningsInfo.getWarnings().iterator();
 
             while (iter.hasNext()) {
                 var33 = (ApkVerifier.IssueWithParams) iter.next();
                 warningsEncountered = true;
+                warningCount++;
                 logMsg.append("WARNING: APK Signature Scheme v2 ").append(var32).append(": ").append(var33).append("\n");
             }
         }
 
         if (!verified || warningsTreatedAsErrors && warningsEncountered) {
-            return new Result(false, logMsg.toString(), apkVerifierResult.isVerifiedUsingV1Scheme(), apkVerifierResult.isVerifiedUsingV2Scheme(), certInfoList);
+            return new Result(false, warningCount, logMsg.toString(), apkVerifierResult.isVerifiedUsingV1Scheme(), apkVerifierResult.isVerifiedUsingV2Scheme(), certInfoList);
         }
 
-        return new Result(true, logMsg.toString(), apkVerifierResult.isVerifiedUsingV1Scheme(), apkVerifierResult.isVerifiedUsingV2Scheme(), certInfoList);
+        return new Result(true, warningCount, logMsg.toString(), apkVerifierResult.isVerifiedUsingV1Scheme(), apkVerifierResult.isVerifiedUsingV2Scheme(), certInfoList);
     }
 
     private static String encode(byte[] data, int offset, int length) {
@@ -180,13 +184,15 @@ public class AndroidApkSignerVerify {
 
     public static class Result {
         public final boolean verified;
+        public final int warning;
         public final String log;
         public final boolean v1Schema;
         public final boolean v2Schema;
         public final List<CertInfo> certInfoList;
 
-        public Result(boolean verified, String log, boolean v1Schema, boolean v2Schema, List<CertInfo> certInfoList) {
+        public Result(boolean verified, int warning, String log, boolean v1Schema, boolean v2Schema, List<CertInfo> certInfoList) {
             this.verified = verified;
+            this.warning = warning;
             this.log = log;
             this.v1Schema = v1Schema;
             this.v2Schema = v2Schema;

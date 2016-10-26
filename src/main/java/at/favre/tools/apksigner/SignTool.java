@@ -242,7 +242,7 @@ public class SignTool {
                     "sign",
                     "--ks", signingConfig.keystore.getAbsolutePath(),
                     "--ks-pass", signingConfig.ksPass == null ? "stdin" : "pass:" + signingConfig.ksPass,
-                    "--key-pass", signingConfig.ksKeyPass == null ? "stdin" : "pass:" + signingConfig.ksPass,
+                    "--key-pass", signingConfig.ksKeyPass == null ? "stdin" : "pass:" + signingConfig.ksKeyPass,
                     "--ks-key-alias", signingConfig.ksAlias,
                     "--out", outFile.getAbsolutePath()
             };

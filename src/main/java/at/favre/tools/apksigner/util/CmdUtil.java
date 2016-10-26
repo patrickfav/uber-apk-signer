@@ -2,7 +2,6 @@ package at.favre.tools.apksigner.util;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
@@ -60,12 +59,7 @@ public class CmdUtil {
             if (pathFile.isFile() && pathFile.getName().toLowerCase().contains(matchesExecutable)) {
                 return pathFile;
             } else if (pathFile.isDirectory()) {
-                File[] matchedFiles = pathFile.listFiles(new FileFilter() {
-                    @Override
-                    public boolean accept(File pathname) {
-                        return pathname.getName().toLowerCase().contains(matchesExecutable);
-                    }
-                });
+                File[] matchedFiles = pathFile.listFiles(pathname -> pathname.getName().toLowerCase().contains(matchesExecutable));
 
                 for (File matchedFile : matchedFiles) {
                     if (CmdUtil.canRunCmd(new String[]{matchedFile.getAbsolutePath()})) {
@@ -83,7 +77,7 @@ public class CmdUtil {
         if (osName.contains("win")) {
             return OS.WIN;
         }
-        if (osName.contains("win")) {
+        if (osName.contains("mac")) {
             return OS.MAC;
         }
 
