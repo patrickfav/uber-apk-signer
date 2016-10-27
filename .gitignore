@@ -12,7 +12,6 @@ build
 target
 
 *.dex
-*.apk
 *.ap_
 *.class
 
