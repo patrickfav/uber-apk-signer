@@ -3,7 +3,7 @@ package at.favre.tools.apksigner.signing;
 import java.io.File;
 
 public class SigningConfig {
-    public enum KeystoreLocation {DEBUG_ANDROID_FOLDER, DEBUG_SAME_FOLDER, DEBUG_EMBEDDED, RELEASE_CUSTOM}
+    public enum KeystoreLocation {DEBUG_ANDROID_FOLDER, DEBUG_SAME_FOLDER, DEBUG_EMBEDDED, DEBUG_CUSTOM_LOCATION, RELEASE_CUSTOM}
 
     public final KeystoreLocation location;
     public final boolean isDebugType;

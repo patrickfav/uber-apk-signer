@@ -23,13 +23,18 @@ This should run on any Windows, Mac or Linux machine where Java8+ is installed.
 
     -a,--apks <file/folder>     Can be a single apk or a folder containing multiple apks. These are used as
                                 source for zipalining/signing/verifying
-       --debug                  Prints additional info for debugging.
+       --debug                  Prints additional subjectAndIssuerDn for debugging.
        --dryRun                 Check what apks would be processed
     -h,--help                   Prints help docs.
-       --ks <keystore>          The keystore file. If this isn't provided, will try to sign with
-                                debug.keystore
+       --ks <keystore>          The keystore file. If this isn't provided, will try to sign with a debug
+                                keystore. The debug keystore will be searched in the same dir as execution and
+                                'user_home/.android' folder. If it is not found there a built-in keystore will
+                                be used for convenience.
        --ksAlias <alias>        The alias of the used key in the keystore. Must be provided if --ks is
                                 provided.
+       --ksDebug <keystore>     Same as --ks parameter but with a debug keystore. With this option the default
+                                keystore alias and passwords are used and any arguments relating to these
+                                parameter are ignored.
        --ksKeyPass <password>   The password for the key. If this is not provided, caller will get an user
                                 prompt to enter it.
        --ksPass <password>      The password for the keystore. If this is not provided, caller will get an
@@ -59,6 +64,10 @@ Sign with your own release keystore
 Provide your own zipalign executable
 
     java -jar uber-apk-signer.jar -a /path/to/apks --zipAlignPath /sdk/build-tools/24.0.3/zipalign
+
+Provide your own location of your debug keystore
+
+    java -jar uber-apk-signer.jar -a /path/to/apks --ksDebug /path/debug.jks
 
 ### Debug Signing Mode
 

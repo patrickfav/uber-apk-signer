@@ -23,20 +23,31 @@ public class SigningConfigGen {
     }
 
     private SigningConfig generate(Arg arguments) {
-        if (arguments.ksFile == null) {
+        if ((arguments.ksIsDebug && arguments.ksFile != null) || arguments.ksFile == null) {
 
             File debugKeystore = null;
             SigningConfig.KeystoreLocation location = SigningConfig.KeystoreLocation.DEBUG_EMBEDDED;
             CmdUtil.OS osType = CmdUtil.getOsType();
 
-            try {
-                File rootFolder = new File(SigningConfigGen.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParentFile();
-                File sameFolderStore = new File(rootFolder, DEBUG_KEYSTORE);
-                if (sameFolderStore.exists()) {
-                    debugKeystore = sameFolderStore;
-                    location = SigningConfig.KeystoreLocation.DEBUG_SAME_FOLDER;
+            if (arguments.ksIsDebug) {
+                debugKeystore = new File(arguments.ksFile);
+
+                if (!debugKeystore.exists() || !debugKeystore.isFile()) {
+                    throw new IllegalArgumentException("debug keystore '" + arguments.ksFile + "' does not exist or is not a file");
                 }
-            } catch (Exception e) {
+                location = SigningConfig.KeystoreLocation.DEBUG_CUSTOM_LOCATION;
+            }
+
+            if (debugKeystore == null) {
+                try {
+                    File rootFolder = new File(SigningConfigGen.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParentFile();
+                    File sameFolderStore = new File(rootFolder, DEBUG_KEYSTORE);
+                    if (sameFolderStore.exists()) {
+                        debugKeystore = sameFolderStore;
+                        location = SigningConfig.KeystoreLocation.DEBUG_SAME_FOLDER;
+                    }
+                } catch (Exception e) {
+                }
             }
 
             if (debugKeystore == null) {
@@ -68,7 +79,8 @@ public class SigningConfigGen {
 
             return new SigningConfig(
                     location,
-                    true, debugKeystore,
+                    true,
+                    debugKeystore,
                     "androiddebugkey",
                     "android",
                     "android"

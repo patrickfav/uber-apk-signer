@@ -6,7 +6,7 @@
 
     <groupId>at.favre.tools</groupId>
     <artifactId>uber-apk-signer</artifactId>
-    <version>0.3.0</version>
+    <version>0.3.1</version>
 
     <prerequisites>
         <maven>3.1.0</maven>
@@ -82,7 +82,7 @@
                         <configuration>
                             <resources>
                                 <resource>
-                                    <directory>${project.basedir}/src/main/resources</directory>
+                                    <directory>${project.basedir}/src/main/resources/lib</directory>
                                 </resource>
                             </resources>
                         </configuration>

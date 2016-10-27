@@ -9,13 +9,13 @@ public class CLIParser {
     public static final String ARG_VERIFY = "onlyVerify";
     public static final String ARG_SKIP_ZIPALIGN = "skipZipAlign";
 
-    public static Arg parse(String[] args) {
+    public static Arg parse(String[] inputArgs) {
         Options options = setupOptions();
         CommandLineParser parser = new DefaultParser();
         Arg argument = new Arg();
 
         try {
-            CommandLine commandLine = parser.parse(options, args);
+            CommandLine commandLine = parser.parse(options, inputArgs);
 
             if (commandLine.hasOption("h") || commandLine.hasOption("help")) {
                 printHelp(options);
@@ -31,10 +31,27 @@ public class CLIParser {
             argument.zipAlignPath = commandLine.getOptionValue("zipAlignPath");
             argument.out = commandLine.getOptionValue(ARG_APK_OUT);
 
-            argument.ksFile = commandLine.getOptionValue("ks");
-            argument.ksAliasName = commandLine.getOptionValue("ksAlias");
-            argument.ksKeyPass = commandLine.getOptionValue("ksKeyPass");
-            argument.ksPass = commandLine.getOptionValue("ksPass");
+            if (commandLine.hasOption("ksDebug") && commandLine.hasOption("ks")) {
+                throw new IllegalArgumentException("Either provide normal keystore or debug keystore location, not both.");
+            }
+
+            if (commandLine.hasOption("ksDebug")) {
+                argument.ksFile = commandLine.getOptionValue("ksDebug");
+                argument.ksIsDebug = true;
+            } else {
+                argument.ksFile = commandLine.getOptionValue("ks");
+                argument.ksAliasName = commandLine.getOptionValue("ksAlias");
+                argument.ksKeyPass = commandLine.getOptionValue("ksKeyPass");
+                argument.ksPass = commandLine.getOptionValue("ksPass");
+
+                if (argument.ksFile == null && (argument.ksPass != null || argument.ksKeyPass != null || argument.ksAliasName != null)) {
+                    throw new IllegalArgumentException("must provide keystore file if any keystore config is given");
+                }
+
+                if (argument.ksFile != null && argument.ksAliasName == null) {
+                    throw new IllegalArgumentException("must provide alias if keystore is given");
+                }
+            }
 
             argument.onlyVerify = commandLine.hasOption(ARG_VERIFY);
             argument.dryRun = commandLine.hasOption("dryRun");
@@ -45,14 +62,6 @@ public class CLIParser {
 
             if (argument.apkFile == null || argument.apkFile.isEmpty()) {
                 throw new IllegalArgumentException("must provide apk file or folder");
-            }
-
-            if (argument.ksFile == null && (argument.ksPass != null || argument.ksKeyPass != null || argument.ksAliasName != null)) {
-                throw new IllegalArgumentException("must provide keystore file if any keystore config is given");
-            }
-
-            if (argument.ksFile != null && argument.ksAliasName == null) {
-                throw new IllegalArgumentException("must provide alias if keystore is given");
             }
 
             if (argument.overwrite && argument.out != null) {
@@ -76,6 +85,7 @@ public class CLIParser {
         Option outOpt = Option.builder(ARG_APK_OUT).longOpt("out").argName("path").hasArg(true).desc("Where the aligned/signed apks will be copied to. Must be a folder. Will generate, if not existent.").build();
 
         Option ksOpt = Option.builder().longOpt("ks").argName("keystore").hasArg(true).desc("The keystore file. If this isn't provided, will try to sign with a debug keystore. The debug keystore will be searched in the same dir as execution and 'user_home/.android' folder. If it is not found there a built-in keystore will be used for convenience.").build();
+        Option ksDebugOpt = Option.builder().longOpt("ksDebug").argName("keystore").hasArg(true).desc("Same as --ks parameter but with a debug keystore. With this option the default keystore alias and passwords are used and any arguments relating to these parameter are ignored.").build();
         Option ksPassOpt = Option.builder().longOpt("ksPass").argName("password").hasArg(true).desc("The password for the keystore. If this is not provided, caller will get an user prompt to enter it.").build();
         Option ksKeyPassOpt = Option.builder().longOpt("ksKeyPass").argName("password").hasArg(true).desc("The password for the key. If this is not provided, caller will get an user prompt to enter it.").build();
         Option ksAliasOpt = Option.builder().longOpt("ksAlias").argName("alias").hasArg(true).desc("The alias of the used key in the keystore. Must be provided if --ks is provided.").build();
@@ -98,7 +108,7 @@ public class CLIParser {
         options.addOptionGroup(mainArgs);
         options.addOption(ksOpt).addOption(ksPassOpt).addOption(ksKeyPassOpt).addOption(ksAliasOpt).addOption(verifyOnlyOpt)
                 .addOption(dryRunOpt).addOption(skipZipOpt).addOption(overwriteOpt).addOption(verboseOpt).addOption(debugOpt)
-                .addOption(zipAlignPathOpt).addOption(outOpt);
+                .addOption(zipAlignPathOpt).addOption(outOpt).addOption(ksDebugOpt);
 
         return options;
     }

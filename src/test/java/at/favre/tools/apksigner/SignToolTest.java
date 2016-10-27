@@ -25,9 +25,7 @@ public class SignToolTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-    public File originalFolder;
-    public File outFolder;
-    public File testReleaseKs;
+    public File originalFolder,outFolder,testReleaseKs,testDebugKeystore;
 
     private List<File> unsingedApks;
     private List<File> singedApks;
@@ -37,6 +35,7 @@ public class SignToolTest {
         originalFolder = temporaryFolder.newFolder("signer-test", "apks");
         outFolder = temporaryFolder.newFolder("signer-test", "out");
         testReleaseKs = new File(getClass().getClassLoader().getResource("test-release-key.jks").toURI().getPath());
+        testDebugKeystore = new File(getClass().getClassLoader().getResource("test-debug.jks").toURI().getPath());
 
         File signedFolder = new File(getClass().getClassLoader().getResource("test-apks-signed").toURI().getPath());
         File unsignedFolder = new File(getClass().getClassLoader().getResource("test-apks-unsigned").toURI().getPath());
@@ -69,6 +68,15 @@ public class SignToolTest {
         List<File> uApks = copyToTestPath(originalFolder, unsingedApks);
 
         String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN + " --ks " + testReleaseKs.getAbsolutePath() + " --ksPass " + ksPass + " --ksKeyPass " + keyPass + " --ksAlias " + ksAlias;
+        testAndCheck(cmd, outFolder, uApks);
+    }
+
+    @Test
+    public void testSignMultipleApksCustomDebugCert() throws Exception {
+        List<File> uApks = copyToTestPath(originalFolder, unsingedApks);
+
+        String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT +
+                " " + outFolder.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN + " --ksDebug " + testDebugKeystore.getAbsolutePath();
         testAndCheck(cmd, outFolder, uApks);
     }
 

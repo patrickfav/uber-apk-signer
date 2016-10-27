@@ -1,6 +1,5 @@
 package at.favre.tools.apksigner.ui;
 
-
 public class Arg {
     public String apkFile;
     public String out;
@@ -16,6 +15,7 @@ public class Arg {
     public boolean skipZipAlign = false;
     public boolean debug = false;
     public boolean onlyVerify = false;
+    public boolean ksIsDebug = false;
 
     public String zipAlignPath;
 
@@ -23,7 +23,8 @@ public class Arg {
     }
 
     public Arg(String apkFile, String out, String ksFile, String ksPass, String ksKeyPass, String ksAliasName,
-               boolean overwrite, boolean dryRun, boolean verbose, boolean skipZipAlign, boolean debug, boolean onlyVerify, String zipAlignPath) {
+               boolean overwrite, boolean dryRun, boolean verbose, boolean skipZipAlign, boolean debug, boolean onlyVerify,
+               String zipAlignPath, boolean ksIsDebug) {
         this.apkFile = apkFile;
         this.out = out;
         this.ksFile = ksFile;
@@ -37,6 +38,7 @@ public class Arg {
         this.debug = debug;
         this.onlyVerify = onlyVerify;
         this.zipAlignPath = zipAlignPath;
+        this.ksIsDebug = ksIsDebug;
     }
 
     @Override
@@ -52,6 +54,7 @@ public class Arg {
         if (skipZipAlign != arg.skipZipAlign) return false;
         if (debug != arg.debug) return false;
         if (onlyVerify != arg.onlyVerify) return false;
+        if (ksIsDebug != arg.ksIsDebug) return false;
         if (apkFile != null ? !apkFile.equals(arg.apkFile) : arg.apkFile != null) return false;
         if (out != null ? !out.equals(arg.out) : arg.out != null) return false;
         if (ksFile != null ? !ksFile.equals(arg.ksFile) : arg.ksFile != null) return false;
@@ -76,6 +79,7 @@ public class Arg {
         result = 31 * result + (skipZipAlign ? 1 : 0);
         result = 31 * result + (debug ? 1 : 0);
         result = 31 * result + (onlyVerify ? 1 : 0);
+        result = 31 * result + (ksIsDebug ? 1 : 0);
         result = 31 * result + (zipAlignPath != null ? zipAlignPath.hashCode() : 0);
         return result;
     }
@@ -95,6 +99,7 @@ public class Arg {
                 ", skipZipAlign=" + skipZipAlign +
                 ", debug=" + debug +
                 ", onlyVerify=" + onlyVerify +
+                ", ksIsDebug=" + ksIsDebug +
                 ", zipAlignPath='" + zipAlignPath + '\'' +
                 '}';
     }
