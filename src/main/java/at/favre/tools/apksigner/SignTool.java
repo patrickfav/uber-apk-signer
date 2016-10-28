@@ -56,6 +56,8 @@ public class SignTool {
                 throw new IllegalArgumentException("provided apk path " + arguments.apkFile + " does not exist");
             }
 
+            log("Using source directory '" + outFolder.getAbsolutePath() + "'.");
+
             Collections.sort(targetApkFiles);
 
             if (arguments.out != null) {
@@ -142,8 +144,8 @@ public class SignTool {
             }
 
 
-            log(String.format(Locale.US, "\n[%s] Successfully processed %d APKs and %d errors in %.2f seconds.",
-                    new Date().toString(), successCount, errorCount, (double) (System.currentTimeMillis() - startTime) / 1000.0));
+            log(String.format(Locale.US, "\n[v%s|%s] Successfully processed %d APKs and %d errors in %.2f seconds.",
+                    CmdUtil.jarVersion(), new Date().toString(), successCount, errorCount, (double) (System.currentTimeMillis() - startTime) / 1000.0));
 
             if (arguments.debug) {
                 log(getCommandHistory(executedCommands));

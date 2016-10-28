@@ -110,4 +110,8 @@ public class CmdUtil {
             return exitValue == 0;
         }
     }
+
+    public static String jarVersion() {
+        return CmdUtil.class.getPackage().getImplementationVersion();
+    }
 }

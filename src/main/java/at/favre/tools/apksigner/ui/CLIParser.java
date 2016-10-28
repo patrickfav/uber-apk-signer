@@ -1,5 +1,6 @@
 package at.favre.tools.apksigner.ui;
 
+import at.favre.tools.apksigner.util.CmdUtil;
 import org.apache.commons.cli.*;
 
 public class CLIParser {
@@ -117,6 +118,6 @@ public class CLIParser {
         HelpFormatter help = new HelpFormatter();
         help.setWidth(110);
         help.setLeftPadding(4);
-        help.printHelp("uber-apk-signer", "Version: " + CLIParser.class.getPackage().getImplementationVersion(), options, "", true);
+        help.printHelp("uber-apk-signer", "Version: " + CmdUtil.jarVersion(), options, "", true);
     }
 }
