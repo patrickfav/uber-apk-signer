@@ -66,7 +66,8 @@ public class AndroidApkSignerVerify {
                 X509Certificate x509Certificate = (X509Certificate) iter.next();
                 byte[] encodedCert = x509Certificate.getEncoded();
 
-                certInfo.subjectAndIssuerDn = "Subject: " + x509Certificate.getSubjectDN().toString() + " / Issuer: " + x509Certificate.getIssuerDN();
+                certInfo.subjectDn = "Subject: " + x509Certificate.getSubjectDN().toString();
+                certInfo.issuerDn = "Issuer: " + x509Certificate.getIssuerDN().toString();
                 certInfo.sigAlgo = x509Certificate.getSigAlgName();
                 certInfo.certSha1 = encode(sha1Digest.digest(encodedCert));
                 certInfo.certSha256 = encode(sha256Digners.digest(encodedCert));
@@ -205,7 +206,8 @@ public class AndroidApkSignerVerify {
         public String certSha256;
         public String pubSha1;
         public String pubSha256;
-        public String subjectAndIssuerDn;
+        public String subjectDn;
+        public String issuerDn;
         public String sigAlgo;
         public String pubAlgo;
         public int pubKeysize;

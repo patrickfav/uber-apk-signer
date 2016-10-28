@@ -15,6 +15,8 @@ import java.util.*;
 
 public class SignTool {
 
+    public static final String ZIPALIGN_ALIGNMENT = "4";
+
     public static void main(String[] args) {
         Result result = mainExecute(args);
         if (result != null && result.error) {
@@ -87,7 +89,8 @@ public class SignTool {
                     iterCount++;
                     File rootTargetFile = targetApkFile;
 
-                    log("\n\r" + targetApkFile.getName());
+                    log("\n" + String.format("%02d", iterCount) + ". " + targetApkFile.getName());
+
                     if (arguments.dryRun) {
                         log("\t - (skip)");
                         continue;
@@ -111,7 +114,10 @@ public class SignTool {
                         }
 
                         targetApkFile = sign(targetApkFile, rootTargetFile, outFolder, signingConfigGen.signingConfig, arguments);
+
                     }
+
+                    logChecksum(rootTargetFile, targetApkFile);
 
                     boolean zipAlignVerified = arguments.skipZipAlign || verifyZipAlign(targetApkFile, rootTargetFile, zipAlignExecutor, arguments, executedCommands);
                     boolean sigVerified = verifySign(targetApkFile, rootTargetFile, arguments.verbose, false);
@@ -164,6 +170,16 @@ public class SignTool {
         return new Result(false, successCount, errorCount);
     }
 
+    private static void logChecksum(File before, File after) throws Exception {
+        if (after == null || before.equals(after)) {
+            log("\t- checksum [sha256]: " + FileUtil.createChecksum(before, "SHA-256"));
+        } else {
+            log("\t- checksum [sha256]: " + FileUtil.createChecksum(before, "SHA-256") + " (original)");
+            log("\t- checksum [sha256]: " + FileUtil.createChecksum(after, "SHA-256") + " (singed)");
+
+        }
+    }
+
     private static File zipAlign(File targetApkFile, File rootTargetFile, File outFolder, ZipAlignExecutor executor, Arg arguments, List<CmdUtil.Result> cmdList) {
         if (!arguments.skipZipAlign) {
 
@@ -179,7 +195,7 @@ public class SignTool {
             if (executor.isExecutableFound()) {
                 String logMsg = "\t- ";
 
-                CmdUtil.Result zipAlignResult = CmdUtil.runCmd(CmdUtil.concat(executor.zipAlignExecutable, new String[]{"4", targetApkFile.getAbsolutePath(), outFile.getAbsolutePath()}));
+                CmdUtil.Result zipAlignResult = CmdUtil.runCmd(CmdUtil.concat(executor.zipAlignExecutable, new String[]{ZIPALIGN_ALIGNMENT, targetApkFile.getAbsolutePath(), outFile.getAbsolutePath()}));
                 cmdList.add(zipAlignResult);
                 if (zipAlignResult.success()) {
                     logMsg += "zipalign success";
@@ -209,7 +225,7 @@ public class SignTool {
             if (executor.isExecutableFound()) {
                 String logMsg = "\t- ";
 
-                CmdUtil.Result zipAlignVerifyResult = CmdUtil.runCmd(CmdUtil.concat(executor.zipAlignExecutable, new String[]{"-c", "4", targetApkFile.getAbsolutePath()}));
+                CmdUtil.Result zipAlignVerifyResult = CmdUtil.runCmd(CmdUtil.concat(executor.zipAlignExecutable, new String[]{"-c", ZIPALIGN_ALIGNMENT, targetApkFile.getAbsolutePath()}));
                 cmdList.add(zipAlignVerifyResult);
                 boolean success = zipAlignVerifyResult.success();
 
@@ -258,9 +274,9 @@ public class SignTool {
                     "--out", outFile.getAbsolutePath()
             };
 
-            if (arguments.verbose) {
-                argArr = CmdUtil.concat(argArr, new String[]{"--verbose"});
-            }
+//            if (arguments.verbose) {
+//                argArr = CmdUtil.concat(argArr, new String[]{"--verbose"});
+//            }
 
             argArr = CmdUtil.concat(argArr, new String[]{
                     targetApkFile.getAbsolutePath()
@@ -302,15 +318,18 @@ public class SignTool {
 
                 if (result.verified) {
                     for (AndroidApkSignerVerify.CertInfo certInfo : result.certInfoList) {
-                        log("\t\t" + certInfo.subjectAndIssuerDn);
+                        log("\t\t" + certInfo.subjectDn);
                         log("\t\tSHA256: " + certInfo.certSha256 + " / " + certInfo.sigAlgo);
                         if (verbose) {
                             log("\t\tSHA1: " + certInfo.certSha1);
+                            log("\t\t" + certInfo.issuerDn);
                             log("\t\tPublic Key SHA256: " + certInfo.pubSha256);
                             log("\t\tPublic Key SHA1: " + certInfo.pubSha1);
                             log("\t\tPublic Key Algo: " + certInfo.pubAlgo + " " + certInfo.pubKeysize);
+                            log("\t\tIssue Date: " + certInfo.beginValidity);
+
                         }
-                        log("\t\tExpires: " + certInfo.expiry.toString() + " / Begin: " + certInfo.beginValidity);
+                        log("\t\tExpires: " + certInfo.expiry.toString());
                     }
                 }
             }

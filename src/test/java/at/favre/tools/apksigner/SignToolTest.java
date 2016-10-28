@@ -25,7 +25,7 @@ public class SignToolTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-    public File originalFolder,outFolder,testReleaseKs,testDebugKeystore;
+    public File originalFolder, outFolder, testReleaseKs, testDebugKeystore;
 
     private List<File> unsingedApks;
     private List<File> singedApks;
@@ -132,6 +132,14 @@ public class SignToolTest {
         assertEquals(0, result.success);
     }
 
+    @Test
+    public void testSignMultipleApksOverwrite() throws Exception {
+        List<File> uApks = copyToTestPath(originalFolder, unsingedApks);
+
+        String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " --overwrite --" + CLIParser.ARG_SKIP_ZIPALIGN;
+        testAndCheck(cmd, originalFolder, uApks);
+    }
+
     private static void testAndCheck(String cmd, File outFolder, List<File> copyApks) throws Exception {
         System.out.println(cmd);
         SignTool.Result result = SignTool.mainExecute(CLIParserTest.asArgArray(cmd));
@@ -144,7 +152,7 @@ public class SignToolTest {
     private static void assertSigned(File outFolder, List<File> uApks) throws Exception {
         assertNotNull(outFolder);
         File[] outFiles = outFolder.listFiles(pathname -> FileUtil.getFileExtension(pathname).toLowerCase().equals("apk"));
-        System.out.println("Found " + outFiles.length + " apks in out dir");
+        System.out.println("Found " + outFiles.length + " apks in out dir "+outFolder);
         assertNotNull(outFiles);
         assertEquals("should be same count of apks in out folder", uApks.size(), outFiles.length);
 
