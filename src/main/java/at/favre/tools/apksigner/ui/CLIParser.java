@@ -91,7 +91,7 @@ public class CLIParser {
         Option ksAliasOpt = Option.builder().longOpt("ksAlias").argName("alias").hasArg(true).desc("The alias of the used key in the keystore. Must be provided if --ks is provided.").build();
         Option zipAlignPathOpt = Option.builder().longOpt("zipAlignPath").argName("path").hasArg(true).desc("Pass your own zipalign executable. If this is omitted the built-in version is used (available for win, mac and linux)").build();
 
-        Option verifyOnlyOpt = Option.builder().longOpt(ARG_VERIFY).hasArg(false).desc("If this is passed, the signature and alignment is only verified.").build();
+        Option verifyOnlyOpt = Option.builder("y").longOpt(ARG_VERIFY).hasArg(false).desc("If this is passed, the signature and alignment is only verified.").build();
         Option dryRunOpt = Option.builder().longOpt("dryRun").hasArg(false).desc("Check what apks would be processed").build();
         Option skipZipOpt = Option.builder().longOpt(ARG_SKIP_ZIPALIGN).hasArg(false).desc("Skips zipAlign process. Also affects verify.").build();
         Option overwriteOpt = Option.builder().longOpt("overwrite").hasArg(false).desc("Will overwrite/delete the apks in-place").build();

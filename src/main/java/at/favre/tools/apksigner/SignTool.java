@@ -15,7 +15,7 @@ import java.util.*;
 
 public class SignTool {
 
-    public static final String ZIPALIGN_ALIGNMENT = "4";
+    private static final String ZIPALIGN_ALIGNMENT = "4";
 
     public static void main(String[] args) {
         Result result = mainExecute(args);
@@ -284,7 +284,7 @@ public class SignTool {
 
             ApkSignerTool.main(argArr);
 
-            String logMsg = "\t- sign succuess";
+            String logMsg = "\t- sign success";
 
 
             if (!rootTargetFile.equals(outFile)) {
@@ -368,12 +368,12 @@ public class SignTool {
         }
     }
 
-    public static class Result {
-        public final boolean error;
-        public final int success;
-        public final int unsuccessful;
+    static class Result {
+        final boolean error;
+        final int success;
+        final int unsuccessful;
 
-        public Result(boolean error, int success, int unsuccessful) {
+        Result(boolean error, int success, int unsuccessful) {
             this.error = error;
             this.success = success;
             this.unsuccessful = unsuccessful;
