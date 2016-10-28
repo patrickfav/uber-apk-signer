@@ -6,14 +6,16 @@ public class SigningConfig {
     public enum KeystoreLocation {DEBUG_ANDROID_FOLDER, DEBUG_SAME_FOLDER, DEBUG_EMBEDDED, DEBUG_CUSTOM_LOCATION, RELEASE_CUSTOM}
 
     public final KeystoreLocation location;
+    public final int configIndex;
     public final boolean isDebugType;
     public final File keystore;
     public final String ksAlias;
     public final String ksPass;
     public final String ksKeyPass;
 
-    public SigningConfig(KeystoreLocation location, boolean isDebugType, File keystore, String ksAlias, String ksPass, String ksKeyPass) {
+    public SigningConfig(KeystoreLocation location, int configIndex, boolean isDebugType, File keystore, String ksAlias, String ksPass, String ksKeyPass) {
         this.location = location;
+        this.configIndex = configIndex;
         this.isDebugType = isDebugType;
         this.keystore = keystore;
         this.ksAlias = ksAlias;
@@ -22,7 +24,7 @@ public class SigningConfig {
     }
 
     public String description() {
-        String desc = "Using keystore mode " + location + ".";
+        String desc = "Using keystore mode " + location + " [" + configIndex + "].";
         if (location == KeystoreLocation.RELEASE_CUSTOM) {
             desc += " (" + keystore.getAbsolutePath() + ")";
         }

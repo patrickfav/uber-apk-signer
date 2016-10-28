@@ -3,6 +3,7 @@ package at.favre.tools.apksigner;
 import at.favre.tools.apksigner.signing.AndroidApkSignerVerify;
 import at.favre.tools.apksigner.ui.CLIParser;
 import at.favre.tools.apksigner.ui.CLIParserTest;
+import at.favre.tools.apksigner.ui.MultiKeystoreParser;
 import at.favre.tools.apksigner.util.FileUtil;
 import org.junit.Before;
 import org.junit.Rule;
@@ -25,7 +26,7 @@ public class SignToolTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-    public File originalFolder, outFolder, testReleaseKs, testDebugKeystore;
+    private File originalFolder, outFolder, testReleaseKs, testDebugKeystore;
 
     private List<File> unsingedApks;
     private List<File> singedApks;
@@ -68,6 +69,16 @@ public class SignToolTest {
         List<File> uApks = copyToTestPath(originalFolder, unsingedApks);
 
         String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN + " --ks " + testReleaseKs.getAbsolutePath() + " --ksPass " + ksPass + " --ksKeyPass " + keyPass + " --ksAlias " + ksAlias;
+        testAndCheck(cmd, outFolder, uApks);
+    }
+
+    @Test
+    public void testSignMultipleApksMultipleCustomCert() throws Exception {
+        List<File> uApks = copyToTestPath(originalFolder, unsingedApks);
+
+        String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT
+                + " " + outFolder.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN
+                + " --ks 1" + MultiKeystoreParser.sep + testReleaseKs.getAbsolutePath() + " 2" + MultiKeystoreParser.sep + testDebugKeystore.getAbsolutePath() + " --ksPass 1" + MultiKeystoreParser.sep + ksPass + " 2" + MultiKeystoreParser.sep + "android --ksKeyPass 1" + MultiKeystoreParser.sep + keyPass + " 2" + MultiKeystoreParser.sep + "android --ksAlias 1" + MultiKeystoreParser.sep + ksAlias + " 2" + MultiKeystoreParser.sep + "androiddebugkey";
         testAndCheck(cmd, outFolder, uApks);
     }
 
@@ -152,14 +163,16 @@ public class SignToolTest {
     private static void assertSigned(File outFolder, List<File> uApks) throws Exception {
         assertNotNull(outFolder);
         File[] outFiles = outFolder.listFiles(pathname -> FileUtil.getFileExtension(pathname).toLowerCase().equals("apk"));
-        System.out.println("Found " + outFiles.length + " apks in out dir "+outFolder);
+        System.out.println("Found " + outFiles.length + " apks in out dir " + outFolder);
         assertNotNull(outFiles);
         assertEquals("should be same count of apks in out folder", uApks.size(), outFiles.length);
 
         for (File outFile : outFiles) {
             AndroidApkSignerVerify.Result verifyResult = new AndroidApkSignerVerify().verify(outFile, null, null, false);
             assertTrue(verifyResult.verified);
-            assertEquals(0, verifyResult.warning);
+            assertEquals(0, verifyResult.warnings.size());
+            assertEquals(0, verifyResult.errors.size());
+            assertFalse(verifyResult.certInfoList.isEmpty());
         }
     }
 

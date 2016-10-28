@@ -36,24 +36,8 @@ public class CLIParser {
                 throw new IllegalArgumentException("Either provide normal keystore or debug keystore location, not both.");
             }
 
-            if (commandLine.hasOption("ksDebug")) {
-                argument.ksFile = commandLine.getOptionValue("ksDebug");
-                argument.ksIsDebug = true;
-            } else {
-                argument.ksFile = commandLine.getOptionValue("ks");
-                argument.ksAliasName = commandLine.getOptionValue("ksAlias");
-                argument.ksKeyPass = commandLine.getOptionValue("ksKeyPass");
-                argument.ksPass = commandLine.getOptionValue("ksPass");
-
-                if (argument.ksFile == null && (argument.ksPass != null || argument.ksKeyPass != null || argument.ksAliasName != null)) {
-                    throw new IllegalArgumentException("must provide keystore file if any keystore config is given");
-                }
-
-                if (argument.ksFile != null && argument.ksAliasName == null) {
-                    throw new IllegalArgumentException("must provide alias if keystore is given");
-                }
-            }
-
+            argument.signArgsList = new MultiKeystoreParser().parse(commandLine);
+            argument.ksIsDebug = commandLine.hasOption("ksDebug");
             argument.onlyVerify = commandLine.hasOption(ARG_VERIFY);
             argument.dryRun = commandLine.hasOption("dryRun");
             argument.debug = commandLine.hasOption("debug");
@@ -80,17 +64,17 @@ public class CLIParser {
         return argument;
     }
 
-    private static Options setupOptions() {
+    static Options setupOptions() {
         Options options = new Options();
-        Option apkPathOpt = Option.builder(ARG_APK_FILE).longOpt("apks").argName("file/folder").hasArg(true).desc("Can be a single apk or a folder containing multiple apks. These are used as source for zipalining/signing/verifying").build();
-        Option outOpt = Option.builder(ARG_APK_OUT).longOpt("out").argName("path").hasArg(true).desc("Where the aligned/signed apks will be copied to. Must be a folder. Will generate, if not existent.").build();
+        Option apkPathOpt = Option.builder(ARG_APK_FILE).longOpt("apks").argName("file/folder").hasArg().desc("Can be a single apk or a folder containing multiple apks. These are used as source for zipalining/signing/verifying").build();
+        Option outOpt = Option.builder(ARG_APK_OUT).longOpt("out").argName("path").hasArg().desc("Where the aligned/signed apks will be copied to. Must be a folder. Will generate, if not existent.").build();
 
-        Option ksOpt = Option.builder().longOpt("ks").argName("keystore").hasArg(true).desc("The keystore file. If this isn't provided, will try to sign with a debug keystore. The debug keystore will be searched in the same dir as execution and 'user_home/.android' folder. If it is not found there a built-in keystore will be used for convenience.").build();
-        Option ksDebugOpt = Option.builder().longOpt("ksDebug").argName("keystore").hasArg(true).desc("Same as --ks parameter but with a debug keystore. With this option the default keystore alias and passwords are used and any arguments relating to these parameter are ignored.").build();
-        Option ksPassOpt = Option.builder().longOpt("ksPass").argName("password").hasArg(true).desc("The password for the keystore. If this is not provided, caller will get an user prompt to enter it.").build();
-        Option ksKeyPassOpt = Option.builder().longOpt("ksKeyPass").argName("password").hasArg(true).desc("The password for the key. If this is not provided, caller will get an user prompt to enter it.").build();
-        Option ksAliasOpt = Option.builder().longOpt("ksAlias").argName("alias").hasArg(true).desc("The alias of the used key in the keystore. Must be provided if --ks is provided.").build();
-        Option zipAlignPathOpt = Option.builder().longOpt("zipAlignPath").argName("path").hasArg(true).desc("Pass your own zipalign executable. If this is omitted the built-in version is used (available for win, mac and linux)").build();
+        Option ksOpt = Option.builder().longOpt("ks").argName("keystore").hasArgs().desc("The keystore file. If this isn't provided, will try to sign with a debug keystore. The debug keystore will be searched in the same dir as execution and 'user_home/.android' folder. If it is not found there a built-in keystore will be used for convenience. It is possible to pass one or multiple keystores. The syntax for multiple params is '<index>" + MultiKeystoreParser.sep + "<keystore>' for example: '1" + MultiKeystoreParser.sep + "keystore.jks'. Must match the parameters of --ksAlias.").build();
+        Option ksDebugOpt = Option.builder().longOpt("ksDebug").argName("keystore").hasArg().desc("Same as --ks parameter but with a debug keystore. With this option the default keystore alias and passwords are used and any arguments relating to these parameter are ignored.").build();
+        Option ksPassOpt = Option.builder().longOpt("ksPass").argName("password").hasArgs().desc("The password for the keystore. If this is not provided, caller will get an user prompt to enter it. It is possible to pass one or multiple passwords for multiple keystore configs. The syntax for multiple params is '<index>" + MultiKeystoreParser.sep + "<password>'. Must match the parameters of --ks.").build();
+        Option ksKeyPassOpt = Option.builder().longOpt("ksKeyPass").argName("password").hasArgs().desc("The password for the key. If this is not provided, caller will get an user prompt to enter it. It is possible to pass one or multiple passwords for multiple keystore configs. The syntax for multiple params is '<index>" + MultiKeystoreParser.sep + "<password>'. Must match the parameters of --ks.").build();
+        Option ksAliasOpt = Option.builder().longOpt("ksAlias").argName("alias").hasArgs().desc("The alias of the used key in the keystore. Must be provided if --ks is provided. It is possible to pass one or multiple aliases for multiple keystore configs. The syntax for multiple params is '<index>" + MultiKeystoreParser.sep + "<alias>' for example: '1" + MultiKeystoreParser.sep + "my-alias'. Must match the parameters of --ks.").build();
+        Option zipAlignPathOpt = Option.builder().longOpt("zipAlignPath").argName("path").hasArg().desc("Pass your own zipalign executable. If this is omitted the built-in version is used (available for win, mac and linux)").build();
 
         Option verifyOnlyOpt = Option.builder("y").longOpt(ARG_VERIFY).hasArg(false).desc("If this is passed, the signature and alignment is only verified.").build();
         Option dryRunOpt = Option.builder().longOpt("dryRun").hasArg(false).desc("Check what apks would be processed").build();

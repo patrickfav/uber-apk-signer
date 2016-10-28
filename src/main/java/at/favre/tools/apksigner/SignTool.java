@@ -6,11 +6,14 @@ import at.favre.tools.apksigner.signing.SigningConfigGen;
 import at.favre.tools.apksigner.signing.ZipAlignExecutor;
 import at.favre.tools.apksigner.ui.Arg;
 import at.favre.tools.apksigner.ui.CLIParser;
+import at.favre.tools.apksigner.util.AndroidApkSignerUtil;
 import at.favre.tools.apksigner.util.CmdUtil;
 import at.favre.tools.apksigner.util.FileUtil;
 import com.android.apksigner.ApkSignerTool;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.PrintStream;
 import java.util.*;
 
 public class SignTool {
@@ -21,6 +24,8 @@ public class SignTool {
         Result result = mainExecute(args);
         if (result != null && result.error) {
             System.exit(1);
+        } else if (result != null && result.unsuccessful > 0) {
+            System.exit(2);
         }
     }
 
@@ -77,8 +82,10 @@ public class SignTool {
                 log(zipAlignExecutor.toString());
             }
             if (!arguments.onlyVerify) {
-                signingConfigGen = new SigningConfigGen(arguments);
-                log(signingConfigGen.signingConfig.description());
+                signingConfigGen = new SigningConfigGen(arguments.signArgsList, arguments.ksIsDebug);
+                for (SigningConfig signingConfig : signingConfigGen.signingConfig) {
+                    log(signingConfig.description());
+                }
             }
 
             long startTime = System.currentTimeMillis();
@@ -94,12 +101,12 @@ public class SignTool {
                     log("\n" + String.format("%02d", iterCount) + ". " + targetApkFile.getName());
 
                     if (arguments.dryRun) {
-                        log("\t - (skip)");
+                        log("\t- (skip)");
                         continue;
                     }
 
                     if (!arguments.onlyVerify && verifySign(targetApkFile, rootTargetFile, false, true)) {
-                        logErr("\t - already signed SKIP");
+                        logErr("\t- already signed SKIP");
                         errorCount++;
                         continue;
                     }
@@ -248,14 +255,14 @@ public class SignTool {
         return true;
     }
 
-    private static File sign(File targetApkFile, File rootTargetFile, File outFolder, SigningConfig signingConfig, Arg arguments) {
+    private static File sign(File targetApkFile, File rootTargetFile, File outFolder, List<SigningConfig> signingConfigs, Arg arguments) {
         try {
             File outFile = targetApkFile;
 
             if (!arguments.overwrite) {
                 String fileName = FileUtil.getFileNameWithoutExtension(targetApkFile);
                 fileName = fileName.replace("-unsigned", "");
-                if (signingConfig.isDebugType) {
+                if (signingConfigs.size() == 1 && signingConfigs.get(0).isDebugType) {
                     fileName += "-debugSigned";
                 } else {
                     fileName += "-signed";
@@ -267,27 +274,14 @@ public class SignTool {
                 }
             }
 
-            String[] argArr = new String[]{
-                    "sign",
-                    "--ks", signingConfig.keystore.getAbsolutePath(),
-                    "--ks-pass", signingConfig.ksPass == null ? "stdin" : "pass:" + signingConfig.ksPass,
-                    "--key-pass", signingConfig.ksKeyPass == null ? "stdin" : "pass:" + signingConfig.ksKeyPass,
-                    "--ks-key-alias", signingConfig.ksAlias,
-                    "--out", outFile.getAbsolutePath()
-            };
-
-//            if (arguments.verbose) {
-//                argArr = CmdUtil.concat(argArr, new String[]{"--verbose"});
-//            }
-
-            argArr = CmdUtil.concat(argArr, new String[]{
-                    targetApkFile.getAbsolutePath()
-            });
-
-            ApkSignerTool.main(argArr);
+            ByteArrayOutputStream apkSignerToolStream = new ByteArrayOutputStream();
+            PrintStream sout = System.out;
+            System.setOut(new PrintStream(apkSignerToolStream));
+            ApkSignerTool.main(AndroidApkSignerUtil.createApkToolArgs(arguments, signingConfigs, targetApkFile, outFile));
+            String output = apkSignerToolStream.toString("UTF-8").trim();
+            System.setOut(sout);
 
             String logMsg = "\t- sign success";
-
 
             if (!rootTargetFile.equals(outFile)) {
                 logMsg += " (" + outFile.getName() + ")";
@@ -295,9 +289,13 @@ public class SignTool {
 
             log(logMsg);
 
+            if (arguments.verbose && !output.isEmpty()) {
+                log("\t\t" + output);
+            }
 
             return outFile;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new IllegalStateException("could not sign " + targetApkFile + ": " + e.getMessage(), e);
         }
     }
@@ -311,15 +309,31 @@ public class SignTool {
                 String logMsg;
 
                 if (result.verified) {
-                    logMsg = "\t- signature verified [" + (result.v1Schema ? "v1" : "") + (result.v1Schema && result.v2Schema ? ", " : "") + (result.v2Schema ? "v2" : "") + "] ";
+                    logMsg = "\t- signature verified (" + result.certInfoList.size() + ") [" + (result.v1Schema ? "v1" : "") + (result.v1Schema && result.v2Schema ? ", " : "") + (result.v2Schema ? "v2" : "") + "] ";
                 } else {
                     logMsg = "\t- signature VERIFY FAILED (" + targetApkFile.getName() + ")";
                 }
 
                 logConditionally(logMsg, targetApkFile, !rootTargetFile.equals(targetApkFile), !result.verified);
 
+                if (!result.errors.isEmpty()) {
+                    for (String e : result.errors) {
+                        logErr("\t\t" + e);
+                    }
+                }
+
+                if (verbose && !result.warnings.isEmpty()) {
+                    for (String w : result.warnings) {
+                        log("\t\t" + w);
+                    }
+                } else if (!result.warnings.isEmpty()) {
+                    log("\t\t" + result.warnings.size() + " warnings");
+                }
+
                 if (result.verified) {
-                    for (AndroidApkSignerVerify.CertInfo certInfo : result.certInfoList) {
+                    for (int i = 0; i < result.certInfoList.size(); i++) {
+                        AndroidApkSignerVerify.CertInfo certInfo = result.certInfoList.get(i);
+
                         log("\t\t" + certInfo.subjectDn);
                         log("\t\tSHA256: " + certInfo.certSha256 + " / " + certInfo.sigAlgo);
                         if (verbose) {
@@ -332,6 +346,10 @@ public class SignTool {
 
                         }
                         log("\t\tExpires: " + certInfo.expiry.toString());
+
+                        if (i < result.certInfoList.size() - 1) {
+                            log("");
+                        }
                     }
                 }
             }

@@ -6,6 +6,9 @@ import at.favre.tools.apksigner.util.CmdUtil;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Scanner;
 
 public class SigningConfigGen {
@@ -16,24 +19,23 @@ public class SigningConfigGen {
 
     private File tempDebugFile;
 
-    public final SigningConfig signingConfig;
+    public final List<SigningConfig> signingConfig;
 
-    public SigningConfigGen(Arg arguments) {
-        signingConfig = generate(arguments);
+    public SigningConfigGen(List<Arg.SignArgs> signArgsList, boolean ksIsDebug) {
+        signingConfig = generate(signArgsList, ksIsDebug);
     }
 
-    private SigningConfig generate(Arg arguments) {
-        if ((arguments.ksIsDebug && arguments.ksFile != null) || arguments.ksFile == null) {
-
+    private List<SigningConfig> generate(List<Arg.SignArgs> signArgsList, boolean ksIsDebug) {
+        if (ksIsDebug || signArgsList.isEmpty()) {
             File debugKeystore = null;
             SigningConfig.KeystoreLocation location = SigningConfig.KeystoreLocation.DEBUG_EMBEDDED;
             CmdUtil.OS osType = CmdUtil.getOsType();
 
-            if (arguments.ksIsDebug) {
-                debugKeystore = new File(arguments.ksFile);
+            if (ksIsDebug && !signArgsList.isEmpty()) {
+                debugKeystore = new File(signArgsList.get(0).ksFile);
 
                 if (!debugKeystore.exists() || !debugKeystore.isFile()) {
-                    throw new IllegalArgumentException("debug keystore '" + arguments.ksFile + "' does not exist or is not a file");
+                    throw new IllegalArgumentException("debug keystore '" + signArgsList.get(0).ksFile + "' does not exist or is not a file");
                 }
                 location = SigningConfig.KeystoreLocation.DEBUG_CUSTOM_LOCATION;
             }
@@ -77,40 +79,48 @@ public class SigningConfigGen {
                 }
             }
 
-            return new SigningConfig(
+            return Collections.singletonList(new SigningConfig(
                     location,
-                    true,
+                    0, true,
                     debugKeystore,
                     "androiddebugkey",
                     "android",
                     "android"
-            );
+            ));
         } else {
-            File keystore = new File(arguments.ksFile);
+            List<SigningConfig> signingConfigs = new ArrayList<>();
 
-            if (arguments.ksFile == null || !keystore.exists() || keystore.isDirectory()) {
-                throw new IllegalArgumentException("passed keystore does not exist: " + arguments.ksFile);
-            }
+            for (Arg.SignArgs signArgs : signArgsList) {
+                File keystore = new File(signArgs.ksFile);
 
-            if (arguments.ksAliasName == null || arguments.ksAliasName.trim().isEmpty()) {
-                throw new IllegalArgumentException("when you provide your own keystore you must pass the keystore alias name");
-            }
+                if (signArgs.ksFile == null || !keystore.exists() || keystore.isDirectory()) {
+                    throw new IllegalArgumentException("passed keystore does not exist: " + signArgs.ksFile);
+                }
 
-            if (arguments.ksPass == null) {
+                if (signArgs.alias == null || signArgs.alias.trim().isEmpty()) {
+                    throw new IllegalArgumentException("when you provide your own keystore you must pass the keystore alias name");
+                }
+
                 Scanner s = new Scanner(System.in);
-                System.out.println("Please provide the keystore password for '" + arguments.ksFile + "':");
-                arguments.ksPass = s.next();
 
-                System.out.println("Please provide the key password for alias '" + arguments.ksAliasName + "':");
-                arguments.ksKeyPass = s.next();
+                if (signArgs.pass == null) {
+                    System.out.println("Please enter the keystore password for config [" + signArgs.index + "] '" + signArgs.ksFile + "':");
+                    signArgs.pass = s.next();
+                }
+
+                if (signArgs.keyPass == null) {
+                    System.out.println("Please enter the key password for config [" + signArgs.index + "] alias '" + signArgs.alias + "' and keystore '" + signArgs.ksFile + "':");
+                    signArgs.keyPass = s.next();
+                }
+
+                signingConfigs.add(new SigningConfig(
+                        SigningConfig.KeystoreLocation.RELEASE_CUSTOM,
+                        signArgs.index, false, keystore,
+                        signArgs.alias,
+                        signArgs.pass,
+                        signArgs.keyPass));
             }
-
-            return new SigningConfig(
-                    SigningConfig.KeystoreLocation.RELEASE_CUSTOM,
-                    false, keystore,
-                    arguments.ksAliasName,
-                    arguments.ksPass,
-                    arguments.ksKeyPass);
+            return signingConfigs;
         }
     }
 

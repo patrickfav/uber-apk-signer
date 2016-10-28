@@ -1,5 +1,5 @@
 # Uber Apk Signer
-A tool that helps signing and zip aligning multiple APKs with either debug or provided release certificates. It supports v1 and v2 Android signing scheme. Easy debug signing with embedded debug keystore. Automatically verifies signature and zipalign after every signing.
+A tool that helps signing, [zip aligning](https://developer.android.com/studio/command-line/zipalign.html) and verifying multiple APKs with either debug or provided release certificates (or multiple). It supports [v1 and v2 Android signing scheme](https://developer.android.com/about/versions/nougat/android-7.0.html#apk_signature_v2). Easy and convinient debug signing with embedded debug keystore. Automatically verifies signature and zipalign after every signing.
 
 Main features:
 
@@ -7,6 +7,7 @@ Main features:
 * verify signature and zipalign of multiple APKs in one step
 * built-in zipalign & debug keystore for convenient usage
 * supports v1 and v2 android apk singing scheme
+* support for multiple signatures for one APK
 * crypto/signing code relied upon official implementation
 
 Basic usage:
@@ -29,23 +30,31 @@ This should run on any Windows, Mac or Linux machine where Java8+ is installed.
        --ks <keystore>          The keystore file. If this isn't provided, will try to sign with a debug
                                 keystore. The debug keystore will be searched in the same dir as execution and
                                 'user_home/.android' folder. If it is not found there a built-in keystore will
-                                be used for convenience.
+                                be used for convenience. It is possible to pass one or multiple keystores. The
+                                syntax for multiple params is '<index>=<keystore>' for example:
+                                '1=keystore.jks'. Must match the parameters of --ksAlias.
        --ksAlias <alias>        The alias of the used key in the keystore. Must be provided if --ks is
-                                provided.
+                                provided. It is possible to pass one or multiple aliases for multiple keystore
+                                configs. The syntax for multiple params is '<index>=<alias>' for example:
+                                '1=my-alias'. Must match the parameters of --ks.
        --ksDebug <keystore>     Same as --ks parameter but with a debug keystore. With this option the default
                                 keystore alias and passwords are used and any arguments relating to these
                                 parameter are ignored.
        --ksKeyPass <password>   The password for the key. If this is not provided, caller will get an user
-                                prompt to enter it.
+                                prompt to enter it. It is possible to pass one or multiple passwords for
+                                multiple keystore configs. The syntax for multiple params is
+                                '<index>=<password>'. Must match the parameters of --ks.
        --ksPass <password>      The password for the keystore. If this is not provided, caller will get an
-                                user prompt to enter it.
+                                user prompt to enter it. It is possible to pass one or multiple passwords for
+                                multiple keystore configs. The syntax for multiple params is
+                                '<index>=<password>'. Must match the parameters of --ks.
     -o,--out <path>             Where the aligned/signed apks will be copied to. Must be a folder. Will
                                 generate, if not existent.
-       --onlyVerify             If this is passed, the signature and alignment is only verified.
        --overwrite              Will overwrite/delete the apks in-place
        --skipZipAlign           Skips zipAlign process. Also affects verify.
     -v,--version                Prints current version.
        --verbose                Prints more output, especially useful for sign verify.
+    -y,--onlyVerify             If this is passed, the signature and alignment is only verified.
        --zipAlignPath <path>    Pass your own zipalign executable. If this is omitted the built-in version is
                                 used (available for win, mac and linux)
 
@@ -69,10 +78,16 @@ Provide your own location of your debug keystore
 
     java -jar uber-apk-signer.jar -a /path/to/apks --ksDebug /path/debug.jks
 
+Sign with your multiple release keystores
+
+    java -jar uber-apk-signer.jar -a /path/to/apks --ks 1=/path/release.jks 2=/path/release2.jks --ksAlias 1=my_alias1 2=my_alias2
+
+
 ### Debug Signing Mode
 
 If no keystore is provided the tool will try to automatically sign with a debug keystore. It will try to find on in the following locations (descending order):
 
+* Keystore location provided with `--ksDebug`
 * `debug.keystore` in the same directory as the jar executable
 * `debug.keystore` found in the `/user_home/.android` folder
 * Embedded `debug.keystore` packaged with the jar executable
