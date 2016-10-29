@@ -3,6 +3,9 @@ package at.favre.tools.apksigner.ui;
 import at.favre.tools.apksigner.util.CmdUtil;
 import org.apache.commons.cli.*;
 
+/**
+ * Parses the command line input and converts it to a structured model ({@link Arg}
+ */
 public class CLIParser {
 
     public static final String ARG_APK_FILE = "a";

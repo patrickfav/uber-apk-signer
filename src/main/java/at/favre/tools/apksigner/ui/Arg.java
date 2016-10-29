@@ -3,6 +3,9 @@ package at.favre.tools.apksigner.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The model for the passed arguments
+ */
 public class Arg {
     public String apkFile;
     public String out;

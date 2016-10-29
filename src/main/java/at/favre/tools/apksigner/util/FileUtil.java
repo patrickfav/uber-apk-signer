@@ -12,9 +12,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 
-/**
- * Created by Christina on 16.10.2016.
- */
 public class FileUtil {
 
     public static String getFileExtension(File file) {

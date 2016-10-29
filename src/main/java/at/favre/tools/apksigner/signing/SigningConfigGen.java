@@ -11,6 +11,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Responsible of creating {@link SigningConfig} from the arguments. Will decide weather to
+ * use a debug keystore (and its logic) or a release keystore (or multiple).
+ */
 public class SigningConfigGen {
 
     private static String WIN_DEBUG_KS_DEFAULT = "\\.android\\debug.keystore";

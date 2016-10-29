@@ -11,6 +11,9 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Responsible for deciding and finding the zipalign executable used by the tool.
+ */
 public class ZipAlignExecutor {
     private enum Location {CUSTOM, PATH, BUILT_IN}
 
@@ -46,7 +49,7 @@ public class ZipAlignExecutor {
 
                     String fileName, lib=null;
                     if (osType == CmdUtil.OS.WIN) {
-                        fileName = "win-zipalign-24_0_3.exe";
+                        fileName = "win-zipalign_25_0_0.exe";
                     } else if (osType == CmdUtil.OS.MAC) {
                         fileName = "mac-zipalign-24_0_3";
                         lib = "linux64-libc++-25_0_0.so"; //TODO test if this works on mac

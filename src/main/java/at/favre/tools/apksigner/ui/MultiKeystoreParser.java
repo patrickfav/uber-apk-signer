@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 
+/**
+ * Responsible for parsing the signing config arguments, especially if multiple configs are passed.
+ */
 public class MultiKeystoreParser {
     public static final String sep = "=";
 

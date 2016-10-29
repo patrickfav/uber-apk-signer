@@ -16,6 +16,9 @@ import java.io.File;
 import java.io.PrintStream;
 import java.util.*;
 
+/**
+ * The main tool that manages the logic of the main process while satisfying the passed arguments
+ */
 public class SignTool {
 
     private static final String ZIPALIGN_ALIGNMENT = "4";

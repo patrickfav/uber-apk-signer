@@ -18,6 +18,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Mirrors the logic of the apksigner.jar from google, but provides more structural log output.
+ */
 public class AndroidApkSignerVerify {
     private static final char[] HEX_DIGITS = "0123456789abcdef".toCharArray();
 

@@ -2,6 +2,9 @@ package at.favre.tools.apksigner.signing;
 
 import java.io.File;
 
+/**
+ * Model for defining a signing config
+ */
 public class SigningConfig {
     public enum KeystoreLocation {DEBUG_ANDROID_FOLDER, DEBUG_SAME_FOLDER, DEBUG_EMBEDDED, DEBUG_CUSTOM_LOCATION, RELEASE_CUSTOM}
 
