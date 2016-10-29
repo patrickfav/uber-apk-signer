@@ -16,6 +16,11 @@ Basic usage:
 
 This should run on any Windows, Mac or Linux machine where Java8+ is installed. 
 
+### Requirements
+
+* JDK 8
+* Currently on Linux/Mac: zipalign must be set in `PATH`
+
 ## Download
 
 [Grab jar from latest Release](https://github.com/patrickfav/uber-apk-signer/releases/latest)
