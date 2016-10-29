@@ -25,6 +25,8 @@ This should run on any Windows, Mac or Linux machine where Java8+ is installed.
 
 [Grab jar from latest Release](https://github.com/patrickfav/uber-apk-signer/releases/latest)
 
+[![asciicast](https://asciinema.org/a/1t99brerp17z4znd94nbzooce.png)](https://asciinema.org/a/1t99brerp17z4znd94nbzooce)
+
 ## Command Line Interface
 
     -a,--apks <file/folder>     Can be a single apk or a folder containing multiple apks. These are used as

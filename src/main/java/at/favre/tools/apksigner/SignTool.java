@@ -115,7 +115,7 @@ public class SignTool {
                         targetApkFile = zipAlign(targetApkFile, rootTargetFile, outFolder, zipAlignExecutor, arguments, executedCommands);
 
                         if (targetApkFile == null) {
-                            throw new IllegalStateException("could not execute zipalign");
+                            throw new IllegalStateException("could not execute linux-zipalign-25_0_0");
                         }
 
                         if (!arguments.overwrite) {
@@ -207,7 +207,7 @@ public class SignTool {
                 CmdUtil.Result zipAlignResult = CmdUtil.runCmd(CmdUtil.concat(executor.zipAlignExecutable, new String[]{ZIPALIGN_ALIGNMENT, targetApkFile.getAbsolutePath(), outFile.getAbsolutePath()}));
                 cmdList.add(zipAlignResult);
                 if (zipAlignResult.success()) {
-                    logMsg += "zipalign success";
+                    logMsg += "linux-zipalign-25_0_0 success";
                 } else {
                     logMsg += "could not align ";
                 }
@@ -221,7 +221,7 @@ public class SignTool {
                 }
                 return zipAlignResult.success() ? outFile : null;
             } else {
-                throw new IllegalArgumentException("could not find zipalign - either skip it or provide a proper location");
+                throw new IllegalArgumentException("could not find linux-zipalign-25_0_0 - either skip it or provide a proper location");
             }
 
         }
@@ -239,16 +239,16 @@ public class SignTool {
                 boolean success = zipAlignVerifyResult.success();
 
                 if (success) {
-                    logMsg += "zipalign verified";
+                    logMsg += "linux-zipalign-25_0_0 verified";
                 } else {
-                    logMsg += "zipalign VERIFY FAILED";
+                    logMsg += "linux-zipalign-25_0_0 VERIFY FAILED";
                 }
 
                 logConditionally(logMsg, targetApkFile, !targetApkFile.equals(rootTargetFile), !success);
 
                 return zipAlignVerifyResult.success();
             } else {
-                throw new IllegalArgumentException("could not find zipalign - either skip it or provide a proper location");
+                throw new IllegalArgumentException("could not find linux-zipalign-25_0_0 - either skip it or provide a proper location");
             }
 
         }

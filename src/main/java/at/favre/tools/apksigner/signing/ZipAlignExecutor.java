@@ -5,7 +5,6 @@ import at.favre.tools.apksigner.util.CmdUtil;
 import at.favre.tools.apksigner.util.FileUtil;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
@@ -45,17 +44,18 @@ public class ZipAlignExecutor {
                 if (zipAlignExecutable == null) {
                     CmdUtil.OS osType = CmdUtil.getOsType();
 
-
-                    String fileName;
+                    String fileName, lib=null;
                     if (osType == CmdUtil.OS.WIN) {
                         fileName = "win-zipalign-24_0_3.exe";
                     } else if (osType == CmdUtil.OS.MAC) {
                         fileName = "mac-zipalign-24_0_3";
+                        lib = "linux64-libc++-25_0_0.so"; //TODO test if this works on mac
                     } else {
-                        fileName = "linux-zipalign-24_0_3";
+                        fileName = "linux-zipalign-25_0_0";
+                        lib = "linux64-libc++-25_0_0.so";
                     }
 
-                    tmpFolder = Files.createTempDirectory("uapksigner-tmp").toFile();
+                    tmpFolder = Files.createTempDirectory("uapksigner-").toFile();
                     File tmpZipAlign = File.createTempFile(fileName, null , tmpFolder);
                     Files.copy(getClass().getClassLoader().getResourceAsStream(fileName), tmpZipAlign.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
@@ -64,10 +64,11 @@ public class ZipAlignExecutor {
                         perms.add(PosixFilePermission.OWNER_EXECUTE);
 
                         Files.setPosixFilePermissions(tmpZipAlign.toPath(), perms);
-                        File lib64File = new File(new File(tmpFolder,"lib64"),"libc++.so");
+
+                        File lib64File = new File(new File(tmpFolder, "lib64"), "libc++.so");
                         lib64File.mkdirs();
                         Files.setPosixFilePermissions(lib64File.toPath(), perms);
-                        Files.copy(getClass().getClassLoader().getResourceAsStream("linux64-libc++.so"), lib64File.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        Files.copy(getClass().getClassLoader().getResourceAsStream("linux64-libc++-25_0_0.so"), lib64File.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     }
 
                     zipAlignExecutable = new String[]{tmpZipAlign.getAbsolutePath()};
@@ -75,7 +76,7 @@ public class ZipAlignExecutor {
                 }
             }
         } catch (Exception e) {
-            throw new IllegalStateException("Could not find location for zipalign. Try to set it in PATH or use the --zipAlignPath argument. Optionally you could skip zipalign with --skipZipAlign. " + e.getMessage(), e);
+            throw new IllegalStateException("Could not find location for linux-zipalign-25_0_0. Try to set it in PATH or use the --zipAlignPath argument. Optionally you could skip linux-zipalign-25_0_0 with --skipZipAlign. " + e.getMessage(), e);
         }
     }
 
@@ -92,6 +93,6 @@ public class ZipAlignExecutor {
 
     @Override
     public String toString() {
-        return "Using zipalign location " + location + ".";
+        return "Using linux-zipalign-25_0_0 location " + location + ".";
     }
 }
