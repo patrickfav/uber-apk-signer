@@ -19,7 +19,7 @@ This should run on any Windows, Mac or Linux machine where Java8+ is installed.
 ### Requirements
 
 * JDK 8
-* Currently on Linux/Mac: zipalign must be set in `PATH`
+* Currently on Linux 32bit/Mac: zipalign must be set in `PATH`
 
 ## Download
 
@@ -87,6 +87,9 @@ Sign with your multiple release keystores
 
     java -jar uber-apk-signer.jar -a /path/to/apks --ks 1=/path/release.jks 2=/path/release2.jks --ksAlias 1=my_alias1 2=my_alias2
 
+### Process Return Value
+
+This application will return `0` if every signing/verifing was successful, `1` if an error happens (e.g. wrong arguments) and `2` if at least 1 sign/verify process was not successful.
 
 ### Debug Signing Mode
 
