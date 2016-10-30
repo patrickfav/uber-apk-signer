@@ -27,7 +27,7 @@ This should run on any Windows, Mac or Linux machine where Java8+ is installed.
 
 ## Demo
 
-[![asciicast](https://asciinema.org/a/1t99brerp17z4znd94nbzooce.png)](https://asciinema.org/a/1t99brerp17z4znd94nbzooce)
+[![asciicast](https://asciinema.org/a/91092.png)](https://asciinema.org/a/91092)
 
 ## Command Line Interface
 
