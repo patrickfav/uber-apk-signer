@@ -96,6 +96,6 @@ public class ZipAlignExecutor {
 
     @Override
     public String toString() {
-        return "zipalign location: " + location + " \n\t\t" + zipAlignExecutable[0];
+        return "zipalign location: " + location + " \n\t" + zipAlignExecutable[0];
     }
 }

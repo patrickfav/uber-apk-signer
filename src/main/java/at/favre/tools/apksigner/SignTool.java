@@ -64,9 +64,7 @@ public class SignTool {
                 throw new IllegalArgumentException("provided apk path " + arguments.apkFile + " does not exist");
             }
 
-            log("CONFIG");
-
-            log("\tsource: \n\t\t" + outFolder.getAbsolutePath());
+            log("source: \n\t" + outFolder.getAbsolutePath());
 
             Collections.sort(targetApkFiles);
 
@@ -84,13 +82,13 @@ public class SignTool {
 
             if (!arguments.skipZipAlign) {
                 zipAlignExecutor = new ZipAlignExecutor(arguments);
-                log("\t" + zipAlignExecutor.toString());
+                log(zipAlignExecutor.toString());
             }
             if (!arguments.onlyVerify) {
-                log("\tKeystore:");
+                log("Keystore:");
                 signingConfigGen = new SigningConfigGen(arguments.signArgsList, arguments.ksIsDebug);
                 for (SigningConfig signingConfig : signingConfigGen.signingConfig) {
-                    log("\t\t" + signingConfig.description());
+                    log("\t" + signingConfig.description());
                 }
             }
 
@@ -164,8 +162,8 @@ public class SignTool {
             }
 
 
-            log(String.format(Locale.US, "\n[v%s|%s] Successfully processed %d APKs and %d errors in %.2f seconds.",
-                    CmdUtil.jarVersion(), new Date().toString(), successCount, errorCount, (double) (System.currentTimeMillis() - startTime) / 1000.0));
+            log(String.format(Locale.US, "\n[%s][v%s]\nSuccessfully processed %d APKs and %d errors in %.2f seconds.",
+                    new Date().toString(), CmdUtil.jarVersion(), successCount, errorCount, (double) (System.currentTimeMillis() - startTime) / 1000.0));
 
             if (arguments.debug) {
                 log(getCommandHistory(executedCommands));
