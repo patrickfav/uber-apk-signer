@@ -30,21 +30,25 @@ public class FileUtil {
         return fileName;
     }
 
-    public static String createChecksum(File file, String shaAlgo) throws Exception {
-        InputStream fis =  new FileInputStream(file);
-        byte[] buffer = new byte[1024];
-        MessageDigest complete = MessageDigest.getInstance(shaAlgo);
-        int numRead;
+    public static String createChecksum(File file, String shaAlgo) {
+        try {
+            InputStream fis = new FileInputStream(file);
+            byte[] buffer = new byte[1024];
+            MessageDigest complete = MessageDigest.getInstance(shaAlgo);
+            int numRead;
 
-        do {
-            numRead = fis.read(buffer);
-            if (numRead > 0) {
-                complete.update(buffer, 0, numRead);
-            }
-        } while (numRead != -1);
+            do {
+                numRead = fis.read(buffer);
+                if (numRead > 0) {
+                    complete.update(buffer, 0, numRead);
+                }
+            } while (numRead != -1);
 
-        fis.close();
-        return DatatypeConverter.printHexBinary(complete.digest()).toLowerCase();
+            fis.close();
+            return DatatypeConverter.printHexBinary(complete.digest()).toLowerCase();
+        } catch (Exception e) {
+            throw new IllegalStateException("could not create checksum for " + file + " and algo " + shaAlgo + ": " + e.getMessage(), e);
+        }
     }
 
     public static void removeRecursive(Path path) {

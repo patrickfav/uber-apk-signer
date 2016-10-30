@@ -1,5 +1,7 @@
 package at.favre.tools.apksigner.signing;
 
+import at.favre.tools.apksigner.util.FileUtil;
+
 import java.io.File;
 
 /**
@@ -27,10 +29,8 @@ public class SigningConfig {
     }
 
     public String description() {
-        String desc = "Using keystore mode " + location + " [" + configIndex + "].";
-        if (location == KeystoreLocation.RELEASE_CUSTOM) {
-            desc += " (" + keystore.getAbsolutePath() + ")";
-        }
+        String checksum = FileUtil.createChecksum(keystore, "SHA-256");
+        String desc = "[" + configIndex + "] " + checksum.substring(0, 8) + " " + keystore.getAbsolutePath() + " (" + location + ")";
         return desc;
     }
 }

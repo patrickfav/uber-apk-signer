@@ -64,7 +64,9 @@ public class SignTool {
                 throw new IllegalArgumentException("provided apk path " + arguments.apkFile + " does not exist");
             }
 
-            log("Using source directory '" + outFolder.getAbsolutePath() + "'.");
+            log("CONFIG");
+
+            log("\tsource: \n\t\t" + outFolder.getAbsolutePath());
 
             Collections.sort(targetApkFiles);
 
@@ -82,12 +84,13 @@ public class SignTool {
 
             if (!arguments.skipZipAlign) {
                 zipAlignExecutor = new ZipAlignExecutor(arguments);
-                log(zipAlignExecutor.toString());
+                log("\t" + zipAlignExecutor.toString());
             }
             if (!arguments.onlyVerify) {
+                log("\tKeystore:");
                 signingConfigGen = new SigningConfigGen(arguments.signArgsList, arguments.ksIsDebug);
                 for (SigningConfig signingConfig : signingConfigGen.signingConfig) {
-                    log(signingConfig.description());
+                    log("\t\t" + signingConfig.description());
                 }
             }
 
@@ -115,10 +118,15 @@ public class SignTool {
                     }
 
                     if (!arguments.onlyVerify) {
+                        log("\n\tSIGN");
+                        log("\tfile: " + rootTargetFile.getAbsolutePath());
+                        log("\tchecksum : " + FileUtil.createChecksum(rootTargetFile, "SHA-256") + " (sha256)");
+
+
                         targetApkFile = zipAlign(targetApkFile, rootTargetFile, outFolder, zipAlignExecutor, arguments, executedCommands);
 
                         if (targetApkFile == null) {
-                            throw new IllegalStateException("could not execute linux-zipalign-25_0_0");
+                            throw new IllegalStateException("could not execute zipalign");
                         }
 
                         if (!arguments.overwrite) {
@@ -129,7 +137,9 @@ public class SignTool {
 
                     }
 
-                    logChecksum(rootTargetFile, targetApkFile);
+                    log("\n\tVERIFY");
+                    log("\tfile: " + targetApkFile.getAbsolutePath());
+                    log("\tchecksum : " + FileUtil.createChecksum(targetApkFile, "SHA-256") + " (sha256)");
 
                     boolean zipAlignVerified = arguments.skipZipAlign || verifyZipAlign(targetApkFile, rootTargetFile, zipAlignExecutor, arguments, executedCommands);
                     boolean sigVerified = verifySign(targetApkFile, rootTargetFile, arguments.verbose, false);
@@ -182,16 +192,6 @@ public class SignTool {
         return new Result(false, successCount, errorCount);
     }
 
-    private static void logChecksum(File before, File after) throws Exception {
-        if (after == null || before.equals(after)) {
-            log("\t- checksum [sha256]: " + FileUtil.createChecksum(before, "SHA-256"));
-        } else {
-            log("\t- checksum [sha256]: " + FileUtil.createChecksum(before, "SHA-256") + " (original)");
-            log("\t- checksum [sha256]: " + FileUtil.createChecksum(after, "SHA-256") + " (singed)");
-
-        }
-    }
-
     private static File zipAlign(File targetApkFile, File rootTargetFile, File outFolder, ZipAlignExecutor executor, Arg arguments, List<CmdUtil.Result> cmdList) {
         if (!arguments.skipZipAlign) {
 
@@ -210,7 +210,7 @@ public class SignTool {
                 CmdUtil.Result zipAlignResult = CmdUtil.runCmd(CmdUtil.concat(executor.zipAlignExecutable, new String[]{ZIPALIGN_ALIGNMENT, targetApkFile.getAbsolutePath(), outFile.getAbsolutePath()}));
                 cmdList.add(zipAlignResult);
                 if (zipAlignResult.success()) {
-                    logMsg += "linux-zipalign-25_0_0 success";
+                    logMsg += "zipalign success";
                 } else {
                     logMsg += "could not align ";
                 }
@@ -224,7 +224,7 @@ public class SignTool {
                 }
                 return zipAlignResult.success() ? outFile : null;
             } else {
-                throw new IllegalArgumentException("could not find linux-zipalign-25_0_0 - either skip it or provide a proper location");
+                throw new IllegalArgumentException("could not find zipalign - either skip it or provide a proper location");
             }
 
         }
@@ -242,18 +242,17 @@ public class SignTool {
                 boolean success = zipAlignVerifyResult.success();
 
                 if (success) {
-                    logMsg += "linux-zipalign-25_0_0 verified";
+                    logMsg += "zipalign verified";
                 } else {
-                    logMsg += "linux-zipalign-25_0_0 VERIFY FAILED";
+                    logMsg += "zipalign VERIFY FAILED";
                 }
 
                 logConditionally(logMsg, targetApkFile, !targetApkFile.equals(rootTargetFile), !success);
 
                 return zipAlignVerifyResult.success();
             } else {
-                throw new IllegalArgumentException("could not find linux-zipalign-25_0_0 - either skip it or provide a proper location");
+                throw new IllegalArgumentException("could not find zipalign - either skip it or provide a proper location");
             }
-
         }
         return true;
     }
@@ -284,13 +283,7 @@ public class SignTool {
             String output = apkSignerToolStream.toString("UTF-8").trim();
             System.setOut(sout);
 
-            String logMsg = "\t- sign success";
-
-            if (!rootTargetFile.equals(outFile)) {
-                logMsg += " (" + outFile.getName() + ")";
-            }
-
-            log(logMsg);
+            log("\t- sign success");
 
             if (arguments.verbose && !output.isEmpty()) {
                 log("\t\t" + output);
@@ -380,7 +373,7 @@ public class SignTool {
     }
 
     private static void logConditionally(String logMsg, File file, boolean appendFile, boolean error) {
-        if (appendFile) {
+        if (appendFile && error) {
             logMsg += " (" + file.getName() + ")";
         }
 

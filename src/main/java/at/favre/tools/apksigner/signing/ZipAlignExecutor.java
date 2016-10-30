@@ -79,7 +79,7 @@ public class ZipAlignExecutor {
                 }
             }
         } catch (Exception e) {
-            throw new IllegalStateException("Could not find location for linux-zipalign-25_0_0. Try to set it in PATH or use the --zipAlignPath argument. Optionally you could skip linux-zipalign-25_0_0 with --skipZipAlign. " + e.getMessage(), e);
+            throw new IllegalStateException("Could not find location for zipalign. Try to set it in PATH or use the --zipAlignPath argument. Optionally you could skip zipalign with --skipZipAlign. " + e.getMessage(), e);
         }
     }
 
@@ -96,6 +96,6 @@ public class ZipAlignExecutor {
 
     @Override
     public String toString() {
-        return "Using linux-zipalign-25_0_0 location " + location + ".";
+        return "zipalign location: " + location + " \n\t\t" + zipAlignExecutable[0];
     }
 }
