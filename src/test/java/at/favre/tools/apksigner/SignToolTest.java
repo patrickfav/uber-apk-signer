@@ -53,7 +53,7 @@ public class SignToolTest {
         List<File> uApks = copyToTestPath(originalFolder, unsingedApks);
 
         String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN;
-        testAndCheck(cmd, outFolder, uApks);
+        testAndCheck(cmd, originalFolder, outFolder, uApks);
     }
 
     @Test
@@ -61,7 +61,7 @@ public class SignToolTest {
         List<File> uApks = copyToTestPath(originalFolder, unsingedApks.subList(0, 1));
         System.out.println("found " + uApks.size() + " apks in out folder");
         String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.listFiles()[0].getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN;
-        testAndCheck(cmd, outFolder, uApks);
+        testAndCheck(cmd, originalFolder, outFolder, uApks);
     }
 
     @Test
@@ -69,7 +69,7 @@ public class SignToolTest {
         List<File> uApks = copyToTestPath(originalFolder, unsingedApks);
 
         String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN + " --ks " + testReleaseKs.getAbsolutePath() + " --ksPass " + ksPass + " --ksKeyPass " + keyPass + " --ksAlias " + ksAlias;
-        testAndCheck(cmd, outFolder, uApks);
+        testAndCheck(cmd, originalFolder, outFolder, uApks);
     }
 
     @Test
@@ -79,7 +79,7 @@ public class SignToolTest {
         String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT
                 + " " + outFolder.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN
                 + " --debug --ks 1" + MultiKeystoreParser.sep + testReleaseKs.getAbsolutePath() + " 2" + MultiKeystoreParser.sep + testDebugKeystore.getAbsolutePath() + " --ksPass 1" + MultiKeystoreParser.sep + ksPass + " 2" + MultiKeystoreParser.sep + "android --ksKeyPass 1" + MultiKeystoreParser.sep + keyPass + " 2" + MultiKeystoreParser.sep + "android --ksAlias 1" + MultiKeystoreParser.sep + ksAlias + " 2" + MultiKeystoreParser.sep + "androiddebugkey";
-        testAndCheck(cmd, outFolder, uApks);
+        testAndCheck(cmd, originalFolder, outFolder, uApks);
     }
 
     @Test
@@ -88,7 +88,7 @@ public class SignToolTest {
 
         String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT +
                 " " + outFolder.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN + " --ksDebug " + testDebugKeystore.getAbsolutePath();
-        testAndCheck(cmd, outFolder, uApks);
+        testAndCheck(cmd, originalFolder, outFolder, uApks);
     }
 
     @Test
@@ -96,7 +96,7 @@ public class SignToolTest {
         copyToTestPath(originalFolder, Collections.singletonList(testReleaseKs));
 
         String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN;
-        testAndCheck(cmd, outFolder, Collections.emptyList());
+        testAndCheck(cmd, null, outFolder, Collections.emptyList());
     }
 
     @Test
@@ -104,7 +104,7 @@ public class SignToolTest {
         List<File> uApks = copyToTestPath(originalFolder, unsingedApks);
 
         String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath()+" --debug";
-        testAndCheck(cmd, outFolder, uApks);
+        testAndCheck(cmd, originalFolder, outFolder, uApks);
     }
 
     @Test
@@ -148,16 +148,20 @@ public class SignToolTest {
         List<File> uApks = copyToTestPath(originalFolder, unsingedApks);
 
         String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " --overwrite --" + CLIParser.ARG_SKIP_ZIPALIGN;
-        testAndCheck(cmd, originalFolder, uApks);
+        testAndCheck(cmd, null, originalFolder, uApks);
     }
 
-    private static void testAndCheck(String cmd, File outFolder, List<File> copyApks) throws Exception {
+    private static void testAndCheck(String cmd, File originalFolder, File outFolder, List<File> copyApks) throws Exception {
         System.out.println(cmd);
         SignTool.Result result = SignTool.mainExecute(CLIParserTest.asArgArray(cmd));
         assertNotNull(result);
         assertEquals(0, result.unsuccessful);
         assertEquals(copyApks.size(), result.success);
         assertSigned(outFolder, copyApks);
+
+        if (originalFolder != null) {
+            assertEquals(copyApks.size(), originalFolder.listFiles().length);
+        }
     }
 
     private static void assertSigned(File outFolder, List<File> uApks) throws Exception {

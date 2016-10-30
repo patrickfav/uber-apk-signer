@@ -127,7 +127,7 @@ public class SignTool {
                             throw new IllegalStateException("could not execute zipalign");
                         }
 
-                        if (!arguments.overwrite) {
+                        if (!arguments.overwrite && !arguments.skipZipAlign) {
                             tempFilesToDelete.add(targetApkFile);
                         }
 
