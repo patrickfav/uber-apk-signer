@@ -1,5 +1,5 @@
 # Uber Apk Signer
-A tool that helps signing, [zip aligning](https://developer.android.com/studio/command-line/zipalign.html) and verifying multiple Android application packages (APKs) with either debug or provided release certificates (or multiple). It supports [v1 and v2 Android signing scheme](https://developer.android.com/about/versions/nougat/android-7.0.html#apk_signature_v2). Easy and convinient debug signing with embedded debug keystore. Automatically verifies signature and zipalign after every signing.
+A tool that helps signing, [zip aligning](https://developer.android.com/studio/command-line/zipalign.html) and verifying multiple Android application packages (APKs) with either debug or provided release certificates (or multiple). It supports [v1 and v2 Android signing scheme](https://developer.android.com/about/versions/nougat/android-7.0.html#apk_signature_v2). Easy and convenient debug signing with embedded debug keystore. Automatically verifies signature and zipalign after every signing.
 
 Main features:
 
@@ -19,7 +19,7 @@ This should run on any Windows, Mac or Linux machine where Java8+ is installed.
 ### Requirements
 
 * JDK 8
-* Currently on Linux 32bit/Mac: zipalign must be set in `PATH`
+* Currently on Linux 32bit: zipalign must be set in `PATH`
 
 ## Download
 
