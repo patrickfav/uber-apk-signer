@@ -32,7 +32,9 @@ This should run on any Windows, Mac or Linux machine where Java8+ is installed.
 ## Command Line Interface
 
     -a,--apks <file/folder>     Can be a single apk or a folder containing multiple apks. These are used as
-                                source for zipalining/signing/verifying
+                                source for zipalining/signing/verifying. It is also possible to provide
+                                multiple locations space seperated (can be mixed file folder): '/apk /apks2
+                                my.apk'. Folder will be checked non-recursively.
        --debug                  Prints additional info for debugging.
        --dryRun                 Check what apks would be processed without actually doing anything.
     -h,--help                   Prints help docs.
@@ -67,6 +69,8 @@ This should run on any Windows, Mac or Linux machine where Java8+ is installed.
        --zipAlignPath <path>    Pass your own zipalign executable. If this is omitted the built-in version is
                                 used (available for win, mac and linux)
 
+### Examples
+
 Provide your own out directory for signed apks
 
     java -jar uber-apk-signer.jar -a /path/to/apks --out /path/to/apks/out
@@ -90,6 +94,10 @@ Provide your own location of your debug keystore
 Sign with your multiple release keystores
 
     java -jar uber-apk-signer.jar -a /path/to/apks --ks 1=/path/release.jks 2=/path/release2.jks --ksAlias 1=my_alias1 2=my_alias2
+
+Use multiple locations or files (will ignore duplicate files)
+
+    java -jar uber-apk-signer.jar -a /path/to/apks /path2 /path3/select1.apk /path3/select2.apk
 
 ### Process Return Value
 

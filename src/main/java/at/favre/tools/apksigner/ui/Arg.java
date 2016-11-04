@@ -1,13 +1,14 @@
 package at.favre.tools.apksigner.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * The model for the passed arguments
  */
 public class Arg {
-    public String apkFile;
+    public String[] apkFile;
     public String out;
 
     public List<SignArgs> signArgsList = new ArrayList<>();
@@ -25,7 +26,7 @@ public class Arg {
     Arg() {
     }
 
-    Arg(String apkFile, String out, List<SignArgs> list,
+    Arg(String[] apkFile, String out, List<SignArgs> list,
         boolean overwrite, boolean dryRun, boolean verbose, boolean skipZipAlign, boolean debug, boolean onlyVerify,
         String zipAlignPath, boolean ksIsDebug) {
         this.apkFile = apkFile;
@@ -55,17 +56,17 @@ public class Arg {
         if (debug != arg.debug) return false;
         if (onlyVerify != arg.onlyVerify) return false;
         if (ksIsDebug != arg.ksIsDebug) return false;
-        if (apkFile != null ? !apkFile.equals(arg.apkFile) : arg.apkFile != null) return false;
+        // Probably incorrect - comparing Object[] arrays with Arrays.equals
+        if (!Arrays.equals(apkFile, arg.apkFile)) return false;
         if (out != null ? !out.equals(arg.out) : arg.out != null) return false;
         if (signArgsList != null ? !signArgsList.equals(arg.signArgsList) : arg.signArgsList != null) return false;
-        if (zipAlignPath != null ? !zipAlignPath.equals(arg.zipAlignPath) : arg.zipAlignPath != null) return false;
+        return zipAlignPath != null ? zipAlignPath.equals(arg.zipAlignPath) : arg.zipAlignPath == null;
 
-        return true;
     }
 
     @Override
     public int hashCode() {
-        int result = apkFile != null ? apkFile.hashCode() : 0;
+        int result = Arrays.hashCode(apkFile);
         result = 31 * result + (out != null ? out.hashCode() : 0);
         result = 31 * result + (signArgsList != null ? signArgsList.hashCode() : 0);
         result = 31 * result + (overwrite ? 1 : 0);
@@ -82,7 +83,7 @@ public class Arg {
     @Override
     public String toString() {
         return "Arg{" +
-                "apkFile='" + apkFile + '\'' +
+                "apkFile=" + Arrays.toString(apkFile) +
                 ", out='" + out + '\'' +
                 ", signArgsList=" + signArgsList +
                 ", overwrite=" + overwrite +

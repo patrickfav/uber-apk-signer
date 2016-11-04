@@ -19,6 +19,7 @@ import java.util.List;
 
 import static junit.framework.TestCase.*;
 
+@SuppressWarnings("ALL")
 public class SignToolTest {
     private final static String ksAlias = "app";
     private final static String ksPass = "password";
@@ -103,7 +104,7 @@ public class SignToolTest {
     public void testSignMultiApkWithZipalign() throws Exception {
         List<File> uApks = copyToTestPath(originalFolder, unsingedApks);
 
-        String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath()+" --debug";
+        String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath() + " --debug";
         testAndCheck(cmd, originalFolder, outFolder, uApks);
     }
 
@@ -150,6 +151,15 @@ public class SignToolTest {
         String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " --overwrite --" + CLIParser.ARG_SKIP_ZIPALIGN;
         testAndCheck(cmd, null, originalFolder, uApks);
     }
+
+    @Test
+    public void testSignMultipleApksFromMultiLocations() throws Exception {
+        copyToTestPath(originalFolder, unsingedApks);
+
+        String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.listFiles()[0].getAbsolutePath() + " " + originalFolder.listFiles()[1].getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN;
+        testAndCheck(cmd, null, outFolder, Arrays.asList(originalFolder.listFiles()[0], originalFolder.listFiles()[1]));
+    }
+
 
     private static void testAndCheck(String cmd, File originalFolder, File outFolder, List<File> copyApks) throws Exception {
         System.out.println(cmd);

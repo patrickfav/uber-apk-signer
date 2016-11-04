@@ -6,6 +6,7 @@ import at.favre.tools.apksigner.signing.SigningConfigGen;
 import at.favre.tools.apksigner.signing.ZipAlignExecutor;
 import at.favre.tools.apksigner.ui.Arg;
 import at.favre.tools.apksigner.ui.CLIParser;
+import at.favre.tools.apksigner.ui.FileArgParser;
 import at.favre.tools.apksigner.util.AndroidApkSignerUtil;
 import at.favre.tools.apksigner.util.CmdUtil;
 import at.favre.tools.apksigner.util.FileUtil;
@@ -50,23 +51,14 @@ public class SignTool {
         int errorCount = 0;
 
         try {
-            File argApkFile = new File(arguments.apkFile);
-            File outFolder;
-            List<File> targetApkFiles = new ArrayList<>();
+            File outFolder = null;
+            List<File> targetApkFiles = new FileArgParser().parseAndSortUniqueFilesNonRecursive(arguments.apkFile);
 
-            if (argApkFile.exists() && argApkFile.isDirectory()) {
-                Collections.addAll(targetApkFiles, argApkFile.listFiles());
-                outFolder = argApkFile;
-            } else if (argApkFile.exists()) {
-                targetApkFiles.add(argApkFile);
-                outFolder = argApkFile.getParentFile();
-            } else {
-                throw new IllegalArgumentException("provided apk path " + arguments.apkFile + " does not exist");
+            log("source:");
+
+            for (File targetApkFile : targetApkFiles) {
+                log("\n\t" + targetApkFile.getCanonicalPath());
             }
-
-            log("source: \n\t" + outFolder.getAbsolutePath());
-
-            Collections.sort(targetApkFiles);
 
             if (arguments.out != null) {
                 outFolder = new File(arguments.out);
@@ -117,7 +109,7 @@ public class SignTool {
 
                     if (!arguments.onlyVerify) {
                         log("\n\tSIGN");
-                        log("\tfile: " + rootTargetFile.getAbsolutePath());
+                        log("\tfile: " + rootTargetFile.getCanonicalPath());
                         log("\tchecksum : " + FileUtil.createChecksum(rootTargetFile, "SHA-256") + " (sha256)");
 
 
@@ -131,12 +123,12 @@ public class SignTool {
                             tempFilesToDelete.add(targetApkFile);
                         }
 
-                        targetApkFile = sign(targetApkFile, rootTargetFile, outFolder, signingConfigGen.signingConfig, arguments);
+                        targetApkFile = sign(targetApkFile, outFolder, signingConfigGen.signingConfig, arguments);
 
                     }
 
                     log("\n\tVERIFY");
-                    log("\tfile: " + targetApkFile.getAbsolutePath());
+                    log("\tfile: " + targetApkFile.getCanonicalPath());
                     log("\tchecksum : " + FileUtil.createChecksum(targetApkFile, "SHA-256") + " (sha256)");
 
                     boolean zipAlignVerified = arguments.skipZipAlign || verifyZipAlign(targetApkFile, rootTargetFile, zipAlignExecutor, arguments, executedCommands);
@@ -196,7 +188,7 @@ public class SignTool {
             String fileName = FileUtil.getFileNameWithoutExtension(targetApkFile);
             fileName = fileName.replace("-unaligned", "");
             fileName += "-aligned";
-            File outFile = new File(outFolder, fileName + "." + FileUtil.getFileExtension(targetApkFile));
+            File outFile = new File(outFolder != null ? outFolder : targetApkFile.getParentFile(), fileName + "." + FileUtil.getFileExtension(targetApkFile));
 
             if (outFile.exists()) {
                 outFile.delete();
@@ -255,7 +247,7 @@ public class SignTool {
         return true;
     }
 
-    private static File sign(File targetApkFile, File rootTargetFile, File outFolder, List<SigningConfig> signingConfigs, Arg arguments) {
+    private static File sign(File targetApkFile, File outFolder, List<SigningConfig> signingConfigs, Arg arguments) {
         try {
             File outFile = targetApkFile;
 
@@ -267,7 +259,7 @@ public class SignTool {
                 } else {
                     fileName += "-signed";
                 }
-                outFile = new File(outFolder, fileName + "." + FileUtil.getFileExtension(targetApkFile));
+                outFile = new File(outFolder != null ? outFolder : targetApkFile.getParentFile(), fileName + "." + FileUtil.getFileExtension(targetApkFile));
 
                 if (outFile.exists()) {
                     outFile.delete();

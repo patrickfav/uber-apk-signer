@@ -31,7 +31,7 @@ public class CLIParser {
                 return null;
             }
 
-            argument.apkFile = commandLine.getOptionValue(ARG_APK_FILE);
+            argument.apkFile = commandLine.getOptionValues(ARG_APK_FILE);
             argument.zipAlignPath = commandLine.getOptionValue("zipAlignPath");
             argument.out = commandLine.getOptionValue(ARG_APK_OUT);
 
@@ -48,7 +48,7 @@ public class CLIParser {
             argument.verbose = commandLine.hasOption("verbose");
             argument.skipZipAlign = commandLine.hasOption(ARG_SKIP_ZIPALIGN);
 
-            if (argument.apkFile == null || argument.apkFile.isEmpty()) {
+            if (argument.apkFile == null || argument.apkFile.length == 0) {
                 throw new IllegalArgumentException("must provide apk file or folder");
             }
 
@@ -69,7 +69,7 @@ public class CLIParser {
 
     static Options setupOptions() {
         Options options = new Options();
-        Option apkPathOpt = Option.builder(ARG_APK_FILE).longOpt("apks").argName("file/folder").hasArg().desc("Can be a single apk or a folder containing multiple apks. These are used as source for zipalining/signing/verifying").build();
+        Option apkPathOpt = Option.builder(ARG_APK_FILE).longOpt("apks").argName("file/folder").hasArgs().desc("Can be a single apk or a folder containing multiple apks. These are used as source for zipalining/signing/verifying. It is also possible to provide multiple locations space seperated (can be mixed file folder): '/apk /apks2 my.apk'. Folder will be checked non-recursively.").build();
         Option outOpt = Option.builder(ARG_APK_OUT).longOpt("out").argName("path").hasArg().desc("Where the aligned/signed apks will be copied to. Must be a folder. Will generate, if not existent.").build();
 
         Option ksOpt = Option.builder().longOpt("ks").argName("keystore").hasArgs().desc("The keystore file. If this isn't provided, will try to sign with a debug keystore. The debug keystore will be searched in the same dir as execution and 'user_home/.android' folder. If it is not found there a built-in keystore will be used for convenience. It is possible to pass one or multiple keystores. The syntax for multiple params is '<index>" + MultiKeystoreParser.sep + "<keystore>' for example: '1" + MultiKeystoreParser.sep + "keystore.jks'. Must match the parameters of --ksAlias.").build();
