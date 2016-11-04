@@ -20,6 +20,7 @@ public class Arg {
     public boolean debug = false;
     public boolean onlyVerify = false;
     public boolean ksIsDebug = false;
+    public boolean allowResign;
 
     public String zipAlignPath;
 
@@ -28,7 +29,7 @@ public class Arg {
 
     Arg(String[] apkFile, String out, List<SignArgs> list,
         boolean overwrite, boolean dryRun, boolean verbose, boolean skipZipAlign, boolean debug, boolean onlyVerify,
-        String zipAlignPath, boolean ksIsDebug) {
+        String zipAlignPath, boolean ksIsDebug, boolean allowResign) {
         this.apkFile = apkFile;
         this.out = out;
         this.signArgsList = list;
@@ -40,6 +41,7 @@ public class Arg {
         this.onlyVerify = onlyVerify;
         this.zipAlignPath = zipAlignPath;
         this.ksIsDebug = ksIsDebug;
+        this.allowResign = allowResign;
     }
 
     @Override
@@ -56,6 +58,7 @@ public class Arg {
         if (debug != arg.debug) return false;
         if (onlyVerify != arg.onlyVerify) return false;
         if (ksIsDebug != arg.ksIsDebug) return false;
+        if (allowResign != arg.allowResign) return false;
         // Probably incorrect - comparing Object[] arrays with Arrays.equals
         if (!Arrays.equals(apkFile, arg.apkFile)) return false;
         if (out != null ? !out.equals(arg.out) : arg.out != null) return false;
@@ -76,6 +79,7 @@ public class Arg {
         result = 31 * result + (debug ? 1 : 0);
         result = 31 * result + (onlyVerify ? 1 : 0);
         result = 31 * result + (ksIsDebug ? 1 : 0);
+        result = 31 * result + (allowResign ? 1 : 0);
         result = 31 * result + (zipAlignPath != null ? zipAlignPath.hashCode() : 0);
         return result;
     }
@@ -93,6 +97,7 @@ public class Arg {
                 ", debug=" + debug +
                 ", onlyVerify=" + onlyVerify +
                 ", ksIsDebug=" + ksIsDebug +
+                ", allowResign=" + allowResign +
                 ", zipAlignPath='" + zipAlignPath + '\'' +
                 '}';
     }

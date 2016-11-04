@@ -46,6 +46,7 @@ public class CLIParser {
             argument.debug = commandLine.hasOption("debug");
             argument.overwrite = commandLine.hasOption("overwrite");
             argument.verbose = commandLine.hasOption("verbose");
+            argument.allowResign = commandLine.hasOption("allowResign");
             argument.skipZipAlign = commandLine.hasOption(ARG_SKIP_ZIPALIGN);
 
             if (argument.apkFile == null || argument.apkFile.length == 0) {
@@ -85,6 +86,7 @@ public class CLIParser {
         Option overwriteOpt = Option.builder().longOpt("overwrite").hasArg(false).desc("Will overwrite/delete the apks in-place").build();
         Option verboseOpt = Option.builder().longOpt("verbose").hasArg(false).desc("Prints more output, especially useful for sign verify.").build();
         Option debugOpt = Option.builder().longOpt("debug").hasArg(false).desc("Prints additional info for debugging.").build();
+        Option resignOpt = Option.builder().longOpt("allowResign").hasArg(false).desc("If this flag is set, the tool will not show error on signed apks, but will sign them with the new certificate (therefore removing the old one)").build();
 
         Option help = Option.builder("h").longOpt("help").desc("Prints help docs.").build();
         Option version = Option.builder("v").longOpt("version").desc("Prints current version.").build();
@@ -96,7 +98,7 @@ public class CLIParser {
         options.addOptionGroup(mainArgs);
         options.addOption(ksOpt).addOption(ksPassOpt).addOption(ksKeyPassOpt).addOption(ksAliasOpt).addOption(verifyOnlyOpt)
                 .addOption(dryRunOpt).addOption(skipZipOpt).addOption(overwriteOpt).addOption(verboseOpt).addOption(debugOpt)
-                .addOption(zipAlignPathOpt).addOption(outOpt).addOption(ksDebugOpt);
+                .addOption(zipAlignPathOpt).addOption(outOpt).addOption(ksDebugOpt).addOption(resignOpt);
 
         return options;
     }

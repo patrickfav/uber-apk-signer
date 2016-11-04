@@ -195,6 +195,17 @@ public class AndroidApkSignerVerify {
             this.v2Schema = v2Schema;
             this.certInfoList = certInfoList;
         }
+
+        public String getSchemaVersionInfoString() {
+            return "[" + (v1Schema ? "v1" : "") + (v1Schema && v2Schema ? ", " : "") + (v2Schema ? "v2" : "") + "] ";
+        }
+
+        public String getCertCountString() {
+            if (certInfoList.size() > 1) {
+                return "(" + certInfoList.size() + ") ";
+            }
+            return "";
+        }
     }
 
     public static class CertInfo {
@@ -209,5 +220,7 @@ public class AndroidApkSignerVerify {
         public int pubKeysize;
         public Date expiry;
         public Date beginValidity;
+
+
     }
 }

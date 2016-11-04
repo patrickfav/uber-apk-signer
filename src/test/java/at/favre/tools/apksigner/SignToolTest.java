@@ -24,7 +24,7 @@ public class SignToolTest {
     private final static String ksAlias = "app";
     private final static String ksPass = "password";
     private final static String keyPass = "keypass";
-
+    private final static String releaseCertSha256 = "29728d7bffedbc3a8e3e3a9cbd1959cc724ae7c178cacf01547f0831fe64c3f1";
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
     private File originalFolder, outFolder, testReleaseKs, testDebugKeystore;
@@ -158,6 +158,26 @@ public class SignToolTest {
 
         String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.listFiles()[0].getAbsolutePath() + " " + originalFolder.listFiles()[1].getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN;
         testAndCheck(cmd, null, outFolder, Arrays.asList(originalFolder.listFiles()[0], originalFolder.listFiles()[1]));
+    }
+
+    @Test
+    public void testResign() throws Exception {
+        copyToTestPath(originalFolder, Collections.singletonList(singedApks.get(0)));
+        File signedApk = originalFolder.listFiles()[0];
+
+        String cmd = "-" + CLIParser.ARG_APK_FILE + " " + signedApk.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath() + " --skipZipAlign --allowResign --debug --ks " + testReleaseKs.getAbsolutePath() + " --ksPass " + ksPass + " --ksKeyPass " + keyPass + " --ksAlias " + ksAlias;
+
+        System.out.println(cmd);
+        SignTool.Result result = SignTool.mainExecute(CLIParserTest.asArgArray(cmd));
+        assertNotNull(result);
+        assertEquals(0, result.unsuccessful);
+        assertEquals(1, result.success);
+        assertEquals(1, outFolder.listFiles().length);
+        AndroidApkSignerVerify.Result verifyResult = new AndroidApkSignerVerify().verify(outFolder.listFiles()[0], null, null, false);
+        assertTrue(verifyResult.verified);
+        assertEquals(0, verifyResult.warnings.size());
+        assertEquals(0, verifyResult.errors.size());
+        assertEquals(releaseCertSha256, verifyResult.certInfoList.get(0).certSha256);
     }
 
 

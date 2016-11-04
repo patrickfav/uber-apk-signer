@@ -57,7 +57,7 @@ public class SignTool {
             log("source:");
 
             for (File targetApkFile : targetApkFiles) {
-                log("\n\t" + targetApkFile.getCanonicalPath());
+                log("\t" + targetApkFile.getCanonicalPath());
             }
 
             if (arguments.out != null) {
@@ -77,7 +77,7 @@ public class SignTool {
                 log(zipAlignExecutor.toString());
             }
             if (!arguments.onlyVerify) {
-                log("Keystore:");
+                log("keystore:");
                 signingConfigGen = new SigningConfigGen(arguments.signArgsList, arguments.ksIsDebug);
                 for (SigningConfig signingConfig : signingConfigGen.signingConfig) {
                     log("\t" + signingConfig.description());
@@ -101,10 +101,21 @@ public class SignTool {
                         continue;
                     }
 
-                    if (!arguments.onlyVerify && verifySign(targetApkFile, rootTargetFile, false, true)) {
-                        logErr("\t- already signed SKIP");
-                        errorCount++;
-                        continue;
+                    if (!arguments.onlyVerify) {
+                        AndroidApkSignerVerify.Result preCheck = verifySign(targetApkFile, rootTargetFile, false, true);
+
+                        if (preCheck.verified && arguments.allowResign) {
+                            log("\tWARNING: already signed - will be resigned. Old certificate info: " + preCheck.getCertCountString() + preCheck.getSchemaVersionInfoString());
+                            for (AndroidApkSignerVerify.CertInfo certInfo : preCheck.certInfoList) {
+                                log("\t\tSubject: " + certInfo.subjectDn);
+                                log("\t\tSHA256: " + certInfo.certSha256);
+                            }
+
+                        } else if (preCheck.verified) {
+                            logErr("\t- already signed SKIP");
+                            errorCount++;
+                            continue;
+                        }
                     }
 
                     if (!arguments.onlyVerify) {
@@ -132,7 +143,7 @@ public class SignTool {
                     log("\tchecksum : " + FileUtil.createChecksum(targetApkFile, "SHA-256") + " (sha256)");
 
                     boolean zipAlignVerified = arguments.skipZipAlign || verifyZipAlign(targetApkFile, rootTargetFile, zipAlignExecutor, arguments, executedCommands);
-                    boolean sigVerified = verifySign(targetApkFile, rootTargetFile, arguments.verbose, false);
+                    boolean sigVerified = verifySign(targetApkFile, rootTargetFile, arguments.verbose, false) != null;
 
                     if (zipAlignVerified && sigVerified) {
                         successCount++;
@@ -286,7 +297,7 @@ public class SignTool {
         }
     }
 
-    private static boolean verifySign(File targetApkFile, File rootTargetFile, boolean verbose, boolean noLog) {
+    private static AndroidApkSignerVerify.Result verifySign(File targetApkFile, File rootTargetFile, boolean verbose, boolean noLog) {
         try {
             AndroidApkSignerVerify verifier = new AndroidApkSignerVerify();
             AndroidApkSignerVerify.Result result = verifier.verify(targetApkFile, null, null, false);
@@ -295,7 +306,7 @@ public class SignTool {
                 String logMsg;
 
                 if (result.verified) {
-                    logMsg = "\t- signature verified (" + result.certInfoList.size() + ") [" + (result.v1Schema ? "v1" : "") + (result.v1Schema && result.v2Schema ? ", " : "") + (result.v2Schema ? "v2" : "") + "] ";
+                    logMsg = "\t- signature verified " + result.getCertCountString() + result.getSchemaVersionInfoString();
                 } else {
                     logMsg = "\t- signature VERIFY FAILED (" + targetApkFile.getName() + ")";
                 }
@@ -339,7 +350,7 @@ public class SignTool {
                     }
                 }
             }
-            return result.verified;
+            return result.verified ? result : null;
         } catch (Exception e) {
             throw new IllegalStateException("could not verifySign " + targetApkFile + ": " + e.getMessage());
         }
