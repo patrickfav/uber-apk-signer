@@ -3,7 +3,7 @@ A tool that helps signing, [zip aligning](https://developer.android.com/studio/c
 
 Main features:
 
-* zipalign, signing and verifying of multiple APKs in one step
+* zipalign, (re)signing and verifying of multiple APKs in one step
 * verify signature (with hash check) and zipalign of multiple APKs in one step
 * built-in zipalign & debug keystore for convenient usage
 * supports v1 and v2 android apk singing scheme
