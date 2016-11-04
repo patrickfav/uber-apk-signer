@@ -23,13 +23,14 @@ public class Arg {
     public boolean allowResign;
 
     public String zipAlignPath;
+    public String[] checkCertSha256;
 
     Arg() {
     }
 
     Arg(String[] apkFile, String out, List<SignArgs> list,
         boolean overwrite, boolean dryRun, boolean verbose, boolean skipZipAlign, boolean debug, boolean onlyVerify,
-        String zipAlignPath, boolean ksIsDebug, boolean allowResign) {
+        String zipAlignPath, boolean ksIsDebug, boolean allowResign, String[] checkCertSha256) {
         this.apkFile = apkFile;
         this.out = out;
         this.signArgsList = list;
@@ -42,6 +43,7 @@ public class Arg {
         this.zipAlignPath = zipAlignPath;
         this.ksIsDebug = ksIsDebug;
         this.allowResign = allowResign;
+        this.checkCertSha256 = checkCertSha256;
     }
 
     @Override
@@ -63,7 +65,9 @@ public class Arg {
         if (!Arrays.equals(apkFile, arg.apkFile)) return false;
         if (out != null ? !out.equals(arg.out) : arg.out != null) return false;
         if (signArgsList != null ? !signArgsList.equals(arg.signArgsList) : arg.signArgsList != null) return false;
-        return zipAlignPath != null ? zipAlignPath.equals(arg.zipAlignPath) : arg.zipAlignPath == null;
+        if (zipAlignPath != null ? !zipAlignPath.equals(arg.zipAlignPath) : arg.zipAlignPath != null) return false;
+        // Probably incorrect - comparing Object[] arrays with Arrays.equals
+        return Arrays.equals(checkCertSha256, arg.checkCertSha256);
 
     }
 
@@ -81,6 +85,7 @@ public class Arg {
         result = 31 * result + (ksIsDebug ? 1 : 0);
         result = 31 * result + (allowResign ? 1 : 0);
         result = 31 * result + (zipAlignPath != null ? zipAlignPath.hashCode() : 0);
+        result = 31 * result + Arrays.hashCode(checkCertSha256);
         return result;
     }
 
@@ -99,6 +104,7 @@ public class Arg {
                 ", ksIsDebug=" + ksIsDebug +
                 ", allowResign=" + allowResign +
                 ", zipAlignPath='" + zipAlignPath + '\'' +
+                ", checkCertSha256=" + Arrays.toString(checkCertSha256) +
                 '}';
     }
 

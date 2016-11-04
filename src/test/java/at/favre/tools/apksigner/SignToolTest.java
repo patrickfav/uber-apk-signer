@@ -25,6 +25,8 @@ public class SignToolTest {
     private final static String ksPass = "password";
     private final static String keyPass = "keypass";
     private final static String releaseCertSha256 = "29728d7bffedbc3a8e3e3a9cbd1959cc724ae7c178cacf01547f0831fe64c3f1";
+    private final static String debugCertSha256 = "3b9e8ae8fadc373d4fff5da150c2e94cc0ad642e7886ffeb9d0fc9327bc66388";
+
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
     private File originalFolder, outFolder, testReleaseKs, testDebugKeystore;
@@ -162,8 +164,8 @@ public class SignToolTest {
 
     @Test
     public void testResign() throws Exception {
-        copyToTestPath(originalFolder, Collections.singletonList(singedApks.get(0)));
-        File signedApk = originalFolder.listFiles()[0];
+        List<File> signedApks = copyToTestPath(originalFolder, Collections.singletonList(singedApks.get(0)));
+        File signedApk = signedApks.get(0);
 
         String cmd = "-" + CLIParser.ARG_APK_FILE + " " + signedApk.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath() + " --skipZipAlign --allowResign --debug --ks " + testReleaseKs.getAbsolutePath() + " --ksPass " + ksPass + " --ksKeyPass " + keyPass + " --ksAlias " + ksAlias;
 
@@ -180,7 +182,38 @@ public class SignToolTest {
         assertEquals(releaseCertSha256, verifyResult.certInfoList.get(0).certSha256);
     }
 
+    @Test
+    public void testCheckHash() throws Exception {
+        List<File> uApks = copyToTestPath(originalFolder, Collections.singletonList(unsingedApks.get(0)));
 
+        String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT +
+                " " + outFolder.getAbsolutePath() + " --debug --verifySha256 " + debugCertSha256 + " --" + CLIParser.ARG_SKIP_ZIPALIGN + " --ksDebug " + testDebugKeystore.getAbsolutePath();
+        testAndCheck(cmd, originalFolder, outFolder, uApks);
+    }
+
+    @Test
+    public void testVerifyWithCheckHashShouldNotBe() throws Exception {
+        copyToTestPath(originalFolder, Collections.singletonList(singedApks.get(0)));
+        String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " --" + CLIParser.ARG_VERIFY + " --" + CLIParser.ARG_SKIP_ZIPALIGN + " --debug --verifySha256 abcdef1234567890";
+        System.out.println(cmd);
+
+        SignTool.Result result = SignTool.mainExecute(CLIParserTest.asArgArray(cmd));
+        assertNotNull(result);
+        assertEquals(1, result.unsuccessful);
+        assertEquals(0, result.success);
+    }
+
+    @Test
+    public void testVerifyWithCheckHash() throws Exception {
+        copyToTestPath(originalFolder, Collections.singletonList(singedApks.get(0)));
+        String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " --" + CLIParser.ARG_VERIFY + " --" + CLIParser.ARG_SKIP_ZIPALIGN + " --debug --verifySha256 a18bc579adba6819a57a665cdf2bfe0b6f2a81263cb2d6860a3d35fac428999a";
+        System.out.println(cmd);
+
+        SignTool.Result result = SignTool.mainExecute(CLIParserTest.asArgArray(cmd));
+        assertNotNull(result);
+        assertEquals(0, result.unsuccessful);
+        assertEquals(1, result.success);
+    }
     private static void testAndCheck(String cmd, File originalFolder, File outFolder, List<File> copyApks) throws Exception {
         System.out.println(cmd);
         SignTool.Result result = SignTool.mainExecute(CLIParserTest.asArgArray(cmd));
@@ -209,7 +242,6 @@ public class SignToolTest {
             assertFalse(verifyResult.certInfoList.isEmpty());
         }
     }
-
 
     private static List<File> copyToTestPath(File target, List<File> source) throws Exception {
         List<File> copiedFiles = new ArrayList<>();

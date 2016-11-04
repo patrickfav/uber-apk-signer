@@ -1,9 +1,6 @@
 package at.favre.tools.apksigner;
 
-import at.favre.tools.apksigner.signing.AndroidApkSignerVerify;
-import at.favre.tools.apksigner.signing.SigningConfig;
-import at.favre.tools.apksigner.signing.SigningConfigGen;
-import at.favre.tools.apksigner.signing.ZipAlignExecutor;
+import at.favre.tools.apksigner.signing.*;
 import at.favre.tools.apksigner.ui.Arg;
 import at.favre.tools.apksigner.ui.CLIParser;
 import at.favre.tools.apksigner.ui.FileArgParser;
@@ -42,7 +39,7 @@ public class SignTool {
         return null;
     }
 
-    private static Result execute(Arg arguments) {
+    private static Result execute(Arg args) {
         List<CmdUtil.Result> executedCommands = new ArrayList<>();
         ZipAlignExecutor zipAlignExecutor = null;
         SigningConfigGen signingConfigGen = null;
@@ -52,7 +49,7 @@ public class SignTool {
 
         try {
             File outFolder = null;
-            List<File> targetApkFiles = new FileArgParser().parseAndSortUniqueFilesNonRecursive(arguments.apkFile);
+            List<File> targetApkFiles = new FileArgParser().parseAndSortUniqueFilesNonRecursive(args.apkFile);
 
             log("source:");
 
@@ -60,25 +57,25 @@ public class SignTool {
                 log("\t" + targetApkFile.getCanonicalPath());
             }
 
-            if (arguments.out != null) {
-                outFolder = new File(arguments.out);
+            if (args.out != null) {
+                outFolder = new File(args.out);
 
                 if (!outFolder.exists()) {
                     outFolder.mkdirs();
                 }
 
                 if (!outFolder.exists() || !outFolder.isDirectory()) {
-                    throw new IllegalArgumentException("if out directory is provided it must exist and be a path: " + arguments.out);
+                    throw new IllegalArgumentException("if out directory is provided it must exist and be a path: " + args.out);
                 }
             }
 
-            if (!arguments.skipZipAlign) {
-                zipAlignExecutor = new ZipAlignExecutor(arguments);
+            if (!args.skipZipAlign) {
+                zipAlignExecutor = new ZipAlignExecutor(args);
                 log(zipAlignExecutor.toString());
             }
-            if (!arguments.onlyVerify) {
+            if (!args.onlyVerify) {
                 log("keystore:");
-                signingConfigGen = new SigningConfigGen(arguments.signArgsList, arguments.ksIsDebug);
+                signingConfigGen = new SigningConfigGen(args.signArgsList, args.ksIsDebug);
                 for (SigningConfig signingConfig : signingConfigGen.signingConfig) {
                     log("\t" + signingConfig.description());
                 }
@@ -96,45 +93,45 @@ public class SignTool {
 
                     log("\n" + String.format("%02d", iterCount) + ". " + targetApkFile.getName());
 
-                    if (arguments.dryRun) {
+                    if (args.dryRun) {
                         log("\t- (skip)");
                         continue;
                     }
 
-                    if (!arguments.onlyVerify) {
-                        AndroidApkSignerVerify.Result preCheck = verifySign(targetApkFile, rootTargetFile, false, true);
+                    if (!args.onlyVerify) {
+                        AndroidApkSignerVerify.Result preCheck = verifySign(targetApkFile, rootTargetFile, args.checkCertSha256, false, true);
 
-                        if (preCheck.verified && arguments.allowResign) {
+                        if (preCheck != null && args.allowResign) {
                             log("\tWARNING: already signed - will be resigned. Old certificate info: " + preCheck.getCertCountString() + preCheck.getSchemaVersionInfoString());
                             for (AndroidApkSignerVerify.CertInfo certInfo : preCheck.certInfoList) {
                                 log("\t\tSubject: " + certInfo.subjectDn);
                                 log("\t\tSHA256: " + certInfo.certSha256);
                             }
 
-                        } else if (preCheck.verified) {
+                        } else if (preCheck != null) {
                             logErr("\t- already signed SKIP");
                             errorCount++;
                             continue;
                         }
                     }
 
-                    if (!arguments.onlyVerify) {
+                    if (!args.onlyVerify) {
                         log("\n\tSIGN");
                         log("\tfile: " + rootTargetFile.getCanonicalPath());
                         log("\tchecksum : " + FileUtil.createChecksum(rootTargetFile, "SHA-256") + " (sha256)");
 
 
-                        targetApkFile = zipAlign(targetApkFile, rootTargetFile, outFolder, zipAlignExecutor, arguments, executedCommands);
+                        targetApkFile = zipAlign(targetApkFile, rootTargetFile, outFolder, zipAlignExecutor, args, executedCommands);
 
                         if (targetApkFile == null) {
                             throw new IllegalStateException("could not execute zipalign");
                         }
 
-                        if (!arguments.overwrite && !arguments.skipZipAlign) {
+                        if (!args.overwrite && !args.skipZipAlign) {
                             tempFilesToDelete.add(targetApkFile);
                         }
 
-                        targetApkFile = sign(targetApkFile, outFolder, signingConfigGen.signingConfig, arguments);
+                        targetApkFile = sign(targetApkFile, outFolder, signingConfigGen.signingConfig, args);
 
                     }
 
@@ -142,8 +139,8 @@ public class SignTool {
                     log("\tfile: " + targetApkFile.getCanonicalPath());
                     log("\tchecksum : " + FileUtil.createChecksum(targetApkFile, "SHA-256") + " (sha256)");
 
-                    boolean zipAlignVerified = arguments.skipZipAlign || verifyZipAlign(targetApkFile, rootTargetFile, zipAlignExecutor, arguments, executedCommands);
-                    boolean sigVerified = verifySign(targetApkFile, rootTargetFile, arguments.verbose, false) != null;
+                    boolean zipAlignVerified = args.skipZipAlign || verifyZipAlign(targetApkFile, rootTargetFile, zipAlignExecutor, args, executedCommands);
+                    boolean sigVerified = verifySign(targetApkFile, rootTargetFile, args.checkCertSha256, args.verbose, false) != null;
 
                     if (zipAlignVerified && sigVerified) {
                         successCount++;
@@ -158,7 +155,7 @@ public class SignTool {
             }
 
             for (File file : tempFilesToDelete) {
-                if (arguments.verbose) {
+                if (args.verbose) {
                     log("delete temp file " + file);
                 }
                 file.delete();
@@ -168,13 +165,13 @@ public class SignTool {
             log(String.format(Locale.US, "\n[%s][v%s]\nSuccessfully processed %d APKs and %d errors in %.2f seconds.",
                     new Date().toString(), CmdUtil.jarVersion(), successCount, errorCount, (double) (System.currentTimeMillis() - startTime) / 1000.0));
 
-            if (arguments.debug) {
+            if (args.debug) {
                 log(getCommandHistory(executedCommands));
             }
         } catch (Exception e) {
             logErr(e.getMessage());
 
-            if (arguments.debug) {
+            if (args.debug) {
                 e.printStackTrace();
                 logErr(getCommandHistory(executedCommands));
             } else {
@@ -297,12 +294,12 @@ public class SignTool {
         }
     }
 
-    private static AndroidApkSignerVerify.Result verifySign(File targetApkFile, File rootTargetFile, boolean verbose, boolean noLog) {
+    private static AndroidApkSignerVerify.Result verifySign(File targetApkFile, File rootTargetFile, String[] checkHashes, boolean verbose, boolean preCheckVerify) {
         try {
             AndroidApkSignerVerify verifier = new AndroidApkSignerVerify();
             AndroidApkSignerVerify.Result result = verifier.verify(targetApkFile, null, null, false);
 
-            if (!noLog) {
+            if (!preCheckVerify) {
                 String logMsg;
 
                 if (result.verified) {
@@ -349,10 +346,22 @@ public class SignTool {
                         }
                     }
                 }
+
+                CertHashChecker.Result certHashResult = new CertHashChecker().check(result, checkHashes);
+                if (certHashResult != null) {
+                    if (!certHashResult.verified) {
+                        log("\t- verify with provided hash check failed " + certHashResult.hashSummary());
+                        logErr("\t\tERROR: " + certHashResult.errorString);
+                    } else {
+                        log("\t- verify with provided hash successful " + certHashResult.hashSummary());
+                    }
+                    return result.verified && certHashResult.verified ? result : null;
+                }
+
             }
             return result.verified ? result : null;
         } catch (Exception e) {
-            throw new IllegalStateException("could not verifySign " + targetApkFile + ": " + e.getMessage());
+            throw new IllegalStateException("could not verifySign " + targetApkFile + ": " + e.getMessage(), e);
         }
     }
 

@@ -39,6 +39,10 @@ public class CLIParser {
                 throw new IllegalArgumentException("Either provide normal keystore or debug keystore location, not both.");
             }
 
+            if (commandLine.hasOption("verifySha256")) {
+                argument.checkCertSha256 = commandLine.getOptionValues("verifySha256");
+            }
+
             argument.signArgsList = new MultiKeystoreParser().parse(commandLine);
             argument.ksIsDebug = commandLine.hasOption("ksDebug");
             argument.onlyVerify = commandLine.hasOption(ARG_VERIFY);
@@ -80,13 +84,15 @@ public class CLIParser {
         Option ksAliasOpt = Option.builder().longOpt("ksAlias").argName("alias").hasArgs().desc("The alias of the used key in the keystore. Must be provided if --ks is provided. It is possible to pass one or multiple aliases for multiple keystore configs. The syntax for multiple params is '<index>" + MultiKeystoreParser.sep + "<alias>' for example: '1" + MultiKeystoreParser.sep + "my-alias'. Must match the parameters of --ks.").build();
         Option zipAlignPathOpt = Option.builder().longOpt("zipAlignPath").argName("path").hasArg().desc("Pass your own zipalign executable. If this is omitted the built-in version is used (available for win, mac and linux)").build();
 
+        Option checkSh256Opt = Option.builder().longOpt("verifySha256").argName("cert-sha256").hasArgs().desc("Provide one or multiple sha256 in string hex representation (ignoring case) to let the tool check it against hashes of the APK's certificate and use it in the verify process. All given hashes must be present in the signature to verify e.g. if 2 hashes are given the apk must have 2 signatures with exact these hashes (providing only one hash, even if it matches one cert, will fail).").build();
+
         Option verifyOnlyOpt = Option.builder("y").longOpt(ARG_VERIFY).hasArg(false).desc("If this is passed, the signature and alignment is only verified.").build();
         Option dryRunOpt = Option.builder().longOpt("dryRun").hasArg(false).desc("Check what apks would be processed without actually doing anything.").build();
         Option skipZipOpt = Option.builder().longOpt(ARG_SKIP_ZIPALIGN).hasArg(false).desc("Skips zipAlign process. Also affects verify.").build();
         Option overwriteOpt = Option.builder().longOpt("overwrite").hasArg(false).desc("Will overwrite/delete the apks in-place").build();
         Option verboseOpt = Option.builder().longOpt("verbose").hasArg(false).desc("Prints more output, especially useful for sign verify.").build();
         Option debugOpt = Option.builder().longOpt("debug").hasArg(false).desc("Prints additional info for debugging.").build();
-        Option resignOpt = Option.builder().longOpt("allowResign").hasArg(false).desc("If this flag is set, the tool will not show error on signed apks, but will sign them with the new certificate (therefore removing the old one)").build();
+        Option resignOpt = Option.builder().longOpt("allowResign").hasArg(false).desc("If this flag is set, the tool will not show error on signed apks, but will sign them with the new certificate (therefore removing the old one).").build();
 
         Option help = Option.builder("h").longOpt("help").desc("Prints help docs.").build();
         Option version = Option.builder("v").longOpt("version").desc("Prints current version.").build();
@@ -98,7 +104,7 @@ public class CLIParser {
         options.addOptionGroup(mainArgs);
         options.addOption(ksOpt).addOption(ksPassOpt).addOption(ksKeyPassOpt).addOption(ksAliasOpt).addOption(verifyOnlyOpt)
                 .addOption(dryRunOpt).addOption(skipZipOpt).addOption(overwriteOpt).addOption(verboseOpt).addOption(debugOpt)
-                .addOption(zipAlignPathOpt).addOption(outOpt).addOption(ksDebugOpt).addOption(resignOpt);
+                .addOption(zipAlignPathOpt).addOption(outOpt).addOption(ksDebugOpt).addOption(resignOpt).addOption(checkSh256Opt);
 
         return options;
     }
