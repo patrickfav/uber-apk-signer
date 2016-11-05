@@ -20,6 +20,7 @@ import java.util.*;
 public class SignTool {
 
     private static final String ZIPALIGN_ALIGNMENT = "4";
+    private static final String APK_FILE_EXTENSION = "apk";
 
     public static void main(String[] args) {
         Result result = mainExecute(args);
@@ -49,12 +50,12 @@ public class SignTool {
 
         try {
             File outFolder = null;
-            List<File> targetApkFiles = new FileArgParser().parseAndSortUniqueFilesNonRecursive(args.apkFile);
+            List<File> targetApkFiles = new FileArgParser().parseAndSortUniqueFilesNonRecursive(args.apkFile, APK_FILE_EXTENSION);
 
             log("source:");
 
-            for (File targetApkFile : targetApkFiles) {
-                log("\t" + targetApkFile.getCanonicalPath());
+            for (String path : FileArgParser.getDirSummary(targetApkFiles)) {
+                log("\t" + path);
             }
 
             if (args.out != null) {
@@ -87,66 +88,64 @@ public class SignTool {
 
             List<File> tempFilesToDelete = new ArrayList<>();
             for (File targetApkFile : targetApkFiles) {
-                if (targetApkFile.isFile() && FileUtil.getFileExtension(targetApkFile).toLowerCase().equals("apk")) {
-                    iterCount++;
-                    File rootTargetFile = targetApkFile;
+                iterCount++;
+                File rootTargetFile = targetApkFile;
 
-                    log("\n" + String.format("%02d", iterCount) + ". " + targetApkFile.getName());
+                log("\n" + String.format("%02d", iterCount) + ". " + targetApkFile.getName());
 
-                    if (args.dryRun) {
-                        log("\t- (skip)");
+                if (args.dryRun) {
+                    log("\t- (skip)");
+                    continue;
+                }
+
+                if (!args.onlyVerify) {
+                    AndroidApkSignerVerify.Result preCheck = verifySign(targetApkFile, rootTargetFile, args.checkCertSha256, false, true);
+
+                    if (preCheck != null && args.allowResign) {
+                        log("\tWARNING: already signed - will be resigned. Old certificate info: " + preCheck.getCertCountString() + preCheck.getSchemaVersionInfoString());
+                        for (AndroidApkSignerVerify.CertInfo certInfo : preCheck.certInfoList) {
+                            log("\t\tSubject: " + certInfo.subjectDn);
+                            log("\t\tSHA256: " + certInfo.certSha256);
+                        }
+
+                    } else if (preCheck != null) {
+                        logErr("\t- already signed SKIP");
+                        errorCount++;
                         continue;
                     }
+                }
 
-                    if (!args.onlyVerify) {
-                        AndroidApkSignerVerify.Result preCheck = verifySign(targetApkFile, rootTargetFile, args.checkCertSha256, false, true);
+                if (!args.onlyVerify) {
+                    log("\n\tSIGN");
+                    log("\tfile: " + rootTargetFile.getCanonicalPath());
+                    log("\tchecksum : " + FileUtil.createChecksum(rootTargetFile, "SHA-256") + " (sha256)");
 
-                        if (preCheck != null && args.allowResign) {
-                            log("\tWARNING: already signed - will be resigned. Old certificate info: " + preCheck.getCertCountString() + preCheck.getSchemaVersionInfoString());
-                            for (AndroidApkSignerVerify.CertInfo certInfo : preCheck.certInfoList) {
-                                log("\t\tSubject: " + certInfo.subjectDn);
-                                log("\t\tSHA256: " + certInfo.certSha256);
-                            }
 
-                        } else if (preCheck != null) {
-                            logErr("\t- already signed SKIP");
-                            errorCount++;
-                            continue;
-                        }
+                    targetApkFile = zipAlign(targetApkFile, rootTargetFile, outFolder, zipAlignExecutor, args, executedCommands);
+
+                    if (targetApkFile == null) {
+                        throw new IllegalStateException("could not execute zipalign");
                     }
 
-                    if (!args.onlyVerify) {
-                        log("\n\tSIGN");
-                        log("\tfile: " + rootTargetFile.getCanonicalPath());
-                        log("\tchecksum : " + FileUtil.createChecksum(rootTargetFile, "SHA-256") + " (sha256)");
-
-
-                        targetApkFile = zipAlign(targetApkFile, rootTargetFile, outFolder, zipAlignExecutor, args, executedCommands);
-
-                        if (targetApkFile == null) {
-                            throw new IllegalStateException("could not execute zipalign");
-                        }
-
-                        if (!args.overwrite && !args.skipZipAlign) {
-                            tempFilesToDelete.add(targetApkFile);
-                        }
-
-                        targetApkFile = sign(targetApkFile, outFolder, signingConfigGen.signingConfig, args);
-
+                    if (!args.overwrite && !args.skipZipAlign) {
+                        tempFilesToDelete.add(targetApkFile);
                     }
 
-                    log("\n\tVERIFY");
-                    log("\tfile: " + targetApkFile.getCanonicalPath());
-                    log("\tchecksum : " + FileUtil.createChecksum(targetApkFile, "SHA-256") + " (sha256)");
+                    targetApkFile = sign(targetApkFile, outFolder, signingConfigGen.signingConfig, args);
 
-                    boolean zipAlignVerified = args.skipZipAlign || verifyZipAlign(targetApkFile, rootTargetFile, zipAlignExecutor, args, executedCommands);
-                    boolean sigVerified = verifySign(targetApkFile, rootTargetFile, args.checkCertSha256, args.verbose, false) != null;
+                }
 
-                    if (zipAlignVerified && sigVerified) {
-                        successCount++;
-                    } else {
-                        errorCount++;
-                    }
+                log("\n\tVERIFY");
+                log("\tfile: " + targetApkFile.getCanonicalPath());
+                log("\tchecksum : " + FileUtil.createChecksum(targetApkFile, "SHA-256") + " (sha256)");
+
+                boolean zipAlignVerified = args.skipZipAlign || verifyZipAlign(targetApkFile, rootTargetFile, zipAlignExecutor, args, executedCommands);
+                boolean sigVerified = verifySign(targetApkFile, rootTargetFile, args.checkCertSha256, args.verbose, false) != null;
+
+                if (zipAlignVerified && sigVerified) {
+                    successCount++;
+                } else {
+                    errorCount++;
                 }
             }
 
