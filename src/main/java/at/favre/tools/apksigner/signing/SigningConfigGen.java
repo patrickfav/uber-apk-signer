@@ -105,17 +105,28 @@ public class SigningConfigGen {
                     throw new IllegalArgumentException("when you provide your own keystore you must pass the keystore alias name");
                 }
 
+
                 Scanner s = new Scanner(System.in);
 
                 if (signArgs.pass == null) {
                     System.out.println("Please enter the keystore password for config [" + signArgs.index + "] '" + signArgs.ksFile + "':");
-                    signArgs.pass = s.next();
+                    if (System.console() != null) {
+                        signArgs.pass = String.valueOf(System.console().readPassword());
+                    } else {
+                        signArgs.pass = s.next();
+                    }
                 }
 
                 if (signArgs.keyPass == null) {
                     System.out.println("Please enter the key password for config [" + signArgs.index + "] alias '" + signArgs.alias + "' and keystore '" + signArgs.ksFile + "':");
-                    signArgs.keyPass = s.next();
+                    if (System.console() != null) {
+                        signArgs.keyPass = String.valueOf(System.console().readPassword());
+                    } else {
+                        signArgs.keyPass = s.next();
+                    }
                 }
+
+                s.close();
 
                 signingConfigs.add(new SigningConfig(
                         SigningConfig.KeystoreLocation.RELEASE_CUSTOM,
