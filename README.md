@@ -64,7 +64,7 @@ This should run on any Windows, Mac or Linux machine where Java8+ is installed.
                                       passwords for multiple keystore configs. The syntax for multiple params
                                       is '<index>=<password>'. Must match the parameters of --ks.
     -o,--out <path>                   Where the aligned/signed apks will be copied to. Must be a folder. Will
-                                      generate, if not existent.
+                                      create, if it does not exist.
        --overwrite                    Will overwrite/delete the apks in-place
        --skipZipAlign                 Skips zipAlign process. Also affects verify.
     -v,--version                      Prints current version.
