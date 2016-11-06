@@ -52,6 +52,10 @@ public class SignTool {
             File outFolder = null;
             List<File> targetApkFiles = new FileArgParser().parseAndSortUniqueFilesNonRecursive(args.apkFile, APK_FILE_EXTENSION);
 
+            if (targetApkFiles.isEmpty()) {
+                throw new IllegalStateException("no apk files found in   given paths");
+            }
+
             log("source:");
 
             for (String path : FileArgParser.getDirSummary(targetApkFiles)) {
