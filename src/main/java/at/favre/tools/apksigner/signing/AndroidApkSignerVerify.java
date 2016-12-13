@@ -1,10 +1,8 @@
 package at.favre.tools.apksigner.signing;
 
 import com.android.apksig.ApkVerifier;
-import com.android.apksigner.ApkSignerTool;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.security.MessageDigest;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
@@ -30,27 +28,15 @@ public class AndroidApkSignerVerify {
         List<String> warnings = new ArrayList<>();
         List<String> errors = new ArrayList<>();
 
-        if (maxSdkVersion == null) {
-            maxSdkVersion = Integer.MAX_VALUE;
+        ApkVerifier.Builder builder = new ApkVerifier.Builder(apk);
+        if (minSdkVersion != null) {
+            builder.setMinCheckedPlatformVersion(minSdkVersion);
+        }
+        if (maxSdkVersion != null) {
+            builder.setMaxCheckedPlatformVersion(maxSdkVersion);
         }
 
-        if (minSdkVersion == null) {
-            try {
-                Method method = ApkSignerTool.class.getDeclaredMethod("getMinSdkVersionFromAndroidManifest", File.class);
-                method.setAccessible(true);
-                minSdkVersion = (Integer) method.invoke(null, apk);
-            } catch (NoSuchMethodException e) {
-                throw new IllegalStateException("Could not get private method from apkSigner lib", e);
-            } catch (Exception e) {
-                throw new IllegalStateException("Failed to deduce Min API Level from APK\'s AndroidManifest.xml. Use --min-sdk-version to override.", e);
-            }
-        }
-
-        if (minSdkVersion > maxSdkVersion) {
-            throw new IllegalStateException("Min API Level (" + minSdkVersion + ") > max API Level (" + maxSdkVersion + ")");
-        }
-
-        ApkVerifier.Result apkVerifierResult = (new ApkVerifier.Builder(apk)).setCheckedPlatformVersions(minSdkVersion, maxSdkVersion).build().verify();
+        ApkVerifier.Result apkVerifierResult = builder.build().verify();
         boolean verified = apkVerifierResult.isVerified();
         Iterator iter;
         if (verified) {

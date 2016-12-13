@@ -6,7 +6,7 @@
 
     <groupId>at.favre.tools</groupId>
     <artifactId>uber-apk-signer</artifactId>
-    <version>0.6.1</version>
+    <version>0.7.0</version>
 
     <prerequisites>
         <maven>3.1.0</maven>
@@ -104,7 +104,7 @@
             <artifactId>apksigner</artifactId>
             <version>1.0</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/apksigner_25_0_0.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/resources/lib/apksigner_25_0_2.jar</systemPath>
         </dependency>
         <!-- test -->
         <dependency>

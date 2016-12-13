@@ -364,7 +364,7 @@ public class SignTool {
             }
             return result.verified ? result : null;
         } catch (Exception e) {
-            throw new IllegalStateException("could not verifySign " + targetApkFile + ": " + e.getMessage(), e);
+            throw new IllegalStateException("could not verify " + targetApkFile + ": " + e.getMessage(), e);
         }
     }
 
