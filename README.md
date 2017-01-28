@@ -1,6 +1,8 @@
 # Uber Apk Signer
 A tool that helps signing, [zip aligning](https://developer.android.com/studio/command-line/zipalign.html) and verifying multiple Android application packages (APKs) with either debug or provided release certificates (or multiple). It supports [v1 and v2 Android signing scheme](https://developer.android.com/about/versions/nougat/android-7.0.html#apk_signature_v2). Easy and convenient debug signing with embedded debug keystore. Automatically verifies signature and zipalign after every signing.
 
+[![Build Status](https://travis-ci.org/patrickfav/uber-apk-signer.svg?branch=master)](https://travis-ci.org/patrickfav/uber-apk-signer)
+
 Main features:
 
 * zipalign, (re)signing and verifying of multiple APKs in one step
