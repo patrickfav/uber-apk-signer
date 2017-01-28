@@ -1,0 +1,38 @@
+# Releases
+
+## v0.7.0
+* updates apksigner to v25.0.2
+* checks for empty input paths
+* masks pw input
+
+## v0.6.0
+* adds verify sha256 feature
+* adds resign feature
+* adds multiple input files/folders feature
+* fixes bug where source would be deleted when using skipZipalign
+
+## v0.5.0
+* adds embedded linux & mac zipalign (x64 only)
+* enhances log output (more structural with checksums etc.)
+
+## v0.4.0
+* adds multi keystore sign feature
+* better verify output
+* adds --ksDebug to provide custom location for debug keystore
+* prints file checksums
+
+## v0.3.0
+* fixes bug where wrong pw was used for release keystores
+* fixes bug where mac was identified as windows machine
+
+## v0.2.0
+* fixes using release keystore
+* better signature verify output
+
+Issue: built-in zipalign for linux & mac do not work yet.
+
+## v0.1.0 beta
+ initial release
+
+* sign, zipalign and verify of multiple apks
+* built-in zipalign & debug.keystore
