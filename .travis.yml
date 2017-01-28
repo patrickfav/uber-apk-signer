@@ -1,0 +1,22 @@
+language: java
+jdk:
+  - oraclejdk8
+
+script:
+    - mvn clean package
+
+deploy:
+  - provider: releases
+    api_key:
+      secure: "1Rb1etBW4/vr587XnqQcx4OtGVFUl2dlszFKhutS4zAt+Fl3TXf6G6ehj5CxT95zo0xuDTiKONhg53AgOB5La+rZ04/QUpV+MiZbGBggZw9fIJIMR/sJcKemmFbKZrTCCWdDuD+34bbbkgwA1f7N3vBfcYQPWRbM+h1eLkuVTovDCaiczTVCx1kbIg1dngZTkiGRizf7PREjkivDIzGq75IQI0V2siV2HPjQUe1z3HVGZfgxWqaEDEQqHBVVhrO5Jr13sZEtn6/Hy/wfGTALevnYkmcs6/l5XUgANdaOAuIyhiqjtvogXw/GFdiyjY3kWt9Wxjk6D7vMnQUjoEz68X6wVMbMBEs83AZVEVQt9CB08Gtu3MPcTOPf4PPjuhJDvacJEszmbPCIpb8q/O6MtLdxJcbNYlHKJiDB7DGnQ93EEDYBV7ccEmzljlnKPAaWr/CLwUOk9JNJopfMZCzQdW2sQmx7+Tsl1eo7cvjRXyjWcFfmjwOzAGW0BgXBqVwmITVZRObamwCmohbRs6bhUXIcOSmxHYlQJryg1KeQ45lA3jghfWtFeIxSMfvG8ZbRg2tmhpwmtK3Opay48KDpRVvnORzMlZj5RHYlZI8PYmY8tTXoYAqQsfwjaRU+C81TwAlNyxRSq0vNwzHJc5rmmwExnlXzN37fkZH/tfN/3XM="
+    file_glob: true
+    file: "target/uber-apk-signer-*.jar"
+    skip_cleanup: true
+    on:
+      branch: master
+      tags: true
+
+notifications:
+  slack:
+    secure: "i6MYvtBqn95n1omWyX+0WR/GzH1b29OWdN3SohE0j4B65qhTbGT9+kfPxCuzTE3LRjd/Bxm0Xce0EQpm+kE61mrDMMJjmrUS/cwnaqWuhNq0odfllnmWiNKdpe8HXRypIruIFL/ux1bkKAAisS6QRjJ4+eHjKZ4HixcKog6FIpyCWVEPjHF3EuTwV7CofPaobvCodtx8FQohtGqIev3PoB5dFl3Fe1QOM4NUdyqI1jXndsHiH0+Q8r1rAJgbmOxPrp+ioAlppIRrrpf97mzhETcEA8xXnrk2Lwl9MlrPRtxkSJlThVzdxoAJnPPwDLAmKBR4ACfn+BHUPreMHYzlTFcHXrnNPs0d6RLY6Ln3TU/e7LD0C63skqnlRw6KTuYmpJOu5781xW+jSQ42EdqazMYWIdGLe37RcPcv+EzyWjrp9wtMDxBl0IQKlpOcSScTQANJCsqUOe237Mr2OT+1FfBHRyEWE8XOsXhkQeUQoT6/iXz/IYYkstSwmVLC7W3bn3GWjqwIMjL3bWyfhCvtFmplPUM7nPlPriP1+hP5labAuDRcM20lQLjIurz1ZlCqhEflKtte8A3z97JBgQ8TWA6kPTtGKJ5H8SzyUEmqfJo7UDyfcsQEPOhio9Ah1/ETcsC+bKYwkgNoEDPboytOdId9Q4sC6dSm37bMYqXteXU="
+  email: false
