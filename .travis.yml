@@ -5,6 +5,9 @@ jdk:
 script:
     - mvn clean package
 
+after_success:
+  - mvn clean test jacoco:report coveralls:report
+
 deploy:
   - provider: releases
     api_key:
