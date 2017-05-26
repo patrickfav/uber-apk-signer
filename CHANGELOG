@@ -1,5 +1,8 @@
 # Releases
 
+## Unreleased
+* adds checksum to release artifacts
+
 ## v0.8.0
 * updates apksigner to v25.0.3
 

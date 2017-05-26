@@ -3,7 +3,7 @@ jdk:
   - oraclejdk8
 
 script:
-    - mvn clean package
+    - mvn clean package checksum:artifacts
 
 after_success:
   - mvn test jacoco:report coveralls:report
@@ -13,7 +13,9 @@ deploy:
     api_key:
       secure: "1Rb1etBW4/vr587XnqQcx4OtGVFUl2dlszFKhutS4zAt+Fl3TXf6G6ehj5CxT95zo0xuDTiKONhg53AgOB5La+rZ04/QUpV+MiZbGBggZw9fIJIMR/sJcKemmFbKZrTCCWdDuD+34bbbkgwA1f7N3vBfcYQPWRbM+h1eLkuVTovDCaiczTVCx1kbIg1dngZTkiGRizf7PREjkivDIzGq75IQI0V2siV2HPjQUe1z3HVGZfgxWqaEDEQqHBVVhrO5Jr13sZEtn6/Hy/wfGTALevnYkmcs6/l5XUgANdaOAuIyhiqjtvogXw/GFdiyjY3kWt9Wxjk6D7vMnQUjoEz68X6wVMbMBEs83AZVEVQt9CB08Gtu3MPcTOPf4PPjuhJDvacJEszmbPCIpb8q/O6MtLdxJcbNYlHKJiDB7DGnQ93EEDYBV7ccEmzljlnKPAaWr/CLwUOk9JNJopfMZCzQdW2sQmx7+Tsl1eo7cvjRXyjWcFfmjwOzAGW0BgXBqVwmITVZRObamwCmohbRs6bhUXIcOSmxHYlQJryg1KeQ45lA3jghfWtFeIxSMfvG8ZbRg2tmhpwmtK3Opay48KDpRVvnORzMlZj5RHYlZI8PYmY8tTXoYAqQsfwjaRU+C81TwAlNyxRSq0vNwzHJc5rmmwExnlXzN37fkZH/tfN/3XM="
     file_glob: true
-    file: "target/uber-apk-signer-*.jar"
+    file:
+     - "target/uber-apk-signer-*.jar"
+     - "target/checksum*"
     skip_cleanup: true
     on:
       branch: master

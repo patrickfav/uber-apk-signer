@@ -12,7 +12,10 @@ import com.android.apksigner.ApkSignerTool;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * The main tool that manages the logic of the main process while satisfying the passed arguments
@@ -53,7 +56,7 @@ public class SignTool {
             List<File> targetApkFiles = new FileArgParser().parseAndSortUniqueFilesNonRecursive(args.apkFile, APK_FILE_EXTENSION);
 
             if (targetApkFiles.isEmpty()) {
-                throw new IllegalStateException("no apk files found in   given paths");
+                throw new IllegalStateException("no apk files found in given paths");
             }
 
             log("source:");
@@ -122,7 +125,7 @@ public class SignTool {
                 if (!args.onlyVerify) {
                     log("\n\tSIGN");
                     log("\tfile: " + rootTargetFile.getCanonicalPath());
-                    log("\tchecksum : " + FileUtil.createChecksum(rootTargetFile, "SHA-256") + " (sha256)");
+                    log("\tchecksum: " + FileUtil.createChecksum(rootTargetFile, "SHA-256") + " (sha256)");
 
 
                     targetApkFile = zipAlign(targetApkFile, rootTargetFile, outFolder, zipAlignExecutor, args, executedCommands);
@@ -141,7 +144,7 @@ public class SignTool {
 
                 log("\n\tVERIFY");
                 log("\tfile: " + targetApkFile.getCanonicalPath());
-                log("\tchecksum : " + FileUtil.createChecksum(targetApkFile, "SHA-256") + " (sha256)");
+                log("\tchecksum: " + FileUtil.createChecksum(targetApkFile, "SHA-256") + " (sha256)");
 
                 boolean zipAlignVerified = args.skipZipAlign || verifyZipAlign(targetApkFile, rootTargetFile, zipAlignExecutor, args, executedCommands);
                 boolean sigVerified = verifySign(targetApkFile, rootTargetFile, args.checkCertSha256, args.verbose, false) != null;

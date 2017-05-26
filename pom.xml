@@ -132,6 +132,27 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>net.nicoulaj.maven.plugins</groupId>
+                <artifactId>checksum-maven-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>artifacts</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <algorithms>
+                        <algorithm>SHA-256</algorithm>
+                    </algorithms>
+                    <shasumSummary>true</shasumSummary>
+                    <shasumSummaryFile>checksum-sha256.txt</shasumSummaryFile>
+                    <attachChecksums>false</attachChecksums>
+                    <quiet>false</quiet>
+                </configuration>
+            </plugin>
             <!--<plugin>-->
             <!--<groupId>com.akathist.maven.plugins.launch4j</groupId>-->
             <!--<artifactId>launch4j-maven-plugin</artifactId>-->
