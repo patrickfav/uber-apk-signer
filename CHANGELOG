@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v0.8.2
+* add jar signing
+
 ## v0.8.1
 * updates apksigner to v26.0.1
 * adds checksum to release artifacts

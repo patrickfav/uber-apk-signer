@@ -33,3 +33,4 @@ Thumbs.db
 .project
 
 signing.properties
+keystore.jks

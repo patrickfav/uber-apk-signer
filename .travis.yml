@@ -2,8 +2,16 @@ language: java
 jdk:
   - oraclejdk8
 
+env:
+  global:
+    - secure: "hy8rRoPkI+sEVdkkYHuBECjT153RLSv/ELbjF9CmwuP2TAxRnRjVTn/vlAnauWQ5gOnw6prcxYzKaNNKItnNCy7rQnwfOO/xFDgq7I8m1CB9IDw1qsndRQ9kA0aQcBgCsq+b5zebs7c3SA21GmTm+QdZ1uxc5fZ2LIKEyZ1W7GSf6HulOlaDrLxpnZzzP8Uo7gh7VGXuGomDhd30EUKSPwgeBNtRwqdW5o1o1uxx9a5W4MGiCHgd1p7qjUfQslRZFTdEaBnAh3fbk5rAfjqoGZ6y82Sf4mmpPdrh+dNmAEs4dc5Ag/pSyZVX3G75INopiIUUe4LbzxxLvNlKvF0q4u3U+uWjY3vfdR1qxxJHQEqcsp87ltafI10uYEP8Tc/C5s2zpaBf/hzlDkHSiuQpTxlfoEf0cKOsgxZUggp9KEWtiKwnJy2i/W/9yReAO6Uun/Ogc36Agc+a6m/yt1vzYGDwsw5KhUYe/jb2xXOVe/p5ZQZeMXb5eeLM1Ag9o/1F13wHN7GUxry0wyfkr0ut28HMcgII2YLVo8+NqisTxV8xQcKTMvO++0J9qlPSFBM2LFztCXDT3kfr4bWzH353tBz3iUh9GeKl4YGEPKwHzt2fcrmmJBI2M6oKXDaoDvuJDc0IzoCuZQVekJgUZczskNAgOHGyDfMdE5NwuAPwAJc="
+    - secure: "ZVN5T24pp3vP7/BupKGCvgBvD514no54GfDrcpY0G+emRxdJTbIied6NChcXbo3nCgNClYf9oxeKQhPdySJeuqd6iNPBWlMmZ7PncXe2Otg8/5x06VtUkICccu2dHdV/9+W6qMA5Y606WV+kmuGvM40O9LEYwtckB2ufbnQpGBQ2ZExuiBjh15ppkIaU8Xl32msaxqp8DskiTa9kt9aR2SkmgSJikGcJACKniviicEfohsDbwxuGN8fAfJciUAGOhXLNcvBrvRRujHUctH+DV2tysYbwRclaimmXIeRy1AWq84v/q6ztDxAd3d+K9vd4q/vHLFcpbKYfB0Le8+G/Rley0/iv/mOOaCIPRC5xPOuXEQiiWzAGFQQ0OZYK143vqMOpxECJdALyC7YAzSG2X+9X2mjqtVIEJZD5WV7HeGtLPvNVpGUvVlctTVzeVfUCShMDHUTGoWodmeXt5MQDG9gWoECbU1Ds4nWmIpUp4bwdGFLdECkZd6M4OidxJP8KWcbP6OjThDaud9/Xh4lhJQsxE0uP25eqE04NpAPGeupGO9U5WH+ElduT6u7wjBT35zDOFpk/LUAvfa29pzejN+NEDeoVK1K45KnlBy4iLbxvC1wrbKRUZZw0dfGsYpGx5zDVPp9h082cTrCjIR+NrBXNUX8btKEqDas+LkqAwAI="
+
+before_install:
+  - openssl aes-256-cbc -K $encrypted_46a968247833_key -iv $encrypted_46a968247833_iv -in keystore.jks.enc -out keystore.jks -d
+
 script:
-    - mvn clean package checksum:artifacts
+  - mvn clean install -X
 
 after_success:
   - mvn test jacoco:report coveralls:report

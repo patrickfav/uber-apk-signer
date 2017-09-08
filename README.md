@@ -145,6 +145,17 @@ If `--skipZipAlign` is passed no executable is needed.
 
 [APK Signature Scheme v2 is a whole-file signature scheme](https://source.android.com/security/apksigning/v2.html) that increases verification speed and strengthens integrity guarantees by detecting any changes to the protected parts of the APK. The older jarsigning is called v1 schema.
 
+## Signed Release Jar
+
+The provided JARs in the Github release page are signed with my private key:
+
+    CN=Patrick Favre-Bulle, OU=Private, O=PF Github Open Source, L=Vienna, ST=Vienna, C=AT
+    Validity: Thu Sep 07 16:40:57 SGT 2017 to: Fri Feb 10 16:40:57 SGT 2034
+    SHA1: 06:DE:F2:C5:F7:BC:0C:11:ED:35:E2:0F:B1:9F:78:99:0F:BE:43:C4
+    SHA256: 2B:65:33:B0:1C:0D:2A:69:4E:2D:53:8F:29:D5:6C:D6:87:AF:06:42:1F:1A:EE:B3:3C:E0:6D:0B:65:A1:AA:88
+
+Use the jarsigner tool (found in your `$JAVA_HOME/bin` folder) folder to verify.
+
 ## Build
 
 Use maven (3.1+) to create a jar including all dependencies
