@@ -4,6 +4,7 @@
 
 ## v0.8.2
 * add jar signing
+* updates apksigner to v26.0.2
 
 ## v0.8.1
 * updates apksigner to v26.0.1
