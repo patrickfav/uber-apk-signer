@@ -1,7 +1,6 @@
 # Releases
 
-## Unreleased
-
+## v0.8.3
 * do not use `javax.xml.bind.*` dependencies, that might crash on jre9
 
 ## v0.8.2
