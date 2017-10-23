@@ -1,10 +1,10 @@
 package at.favre.tools.apksigner.util;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,7 +45,7 @@ public class FileUtil {
             } while (numRead != -1);
 
             fis.close();
-            return DatatypeConverter.printHexBinary(complete.digest()).toLowerCase();
+            return new BigInteger(1, complete.digest()).toString(16).toLowerCase();
         } catch (Exception e) {
             throw new IllegalStateException("could not create checksum for " + file + " and algo " + shaAlgo + ": " + e.getMessage(), e);
         }
@@ -77,7 +77,7 @@ public class FileUtil {
                 }
             });
         } catch (Exception e) {
-            throw new IllegalStateException("could not delete "+path+": "+e.getMessage(),e);
+            throw new IllegalStateException("could not delete " + path + ": " + e.getMessage(), e);
         }
     }
 }

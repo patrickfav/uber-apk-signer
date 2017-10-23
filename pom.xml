@@ -6,7 +6,7 @@
 
     <groupId>at.favre.tools</groupId>
     <artifactId>uber-apk-signer</artifactId>
-    <version>0.8.2</version>
+    <version>0.8.3</version>
 
     <prerequisites>
         <maven>3.1.0</maven>
