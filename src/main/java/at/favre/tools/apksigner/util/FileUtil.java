@@ -12,7 +12,10 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 
-public class FileUtil {
+public final class FileUtil {
+
+    private FileUtil() {
+    }
 
     public static String getFileExtension(File file) {
         if (file == null) {
@@ -77,7 +80,7 @@ public class FileUtil {
                 }
             });
         } catch (Exception e) {
-            throw new IllegalStateException("could not delete "+path+": "+e.getMessage(),e);
+            throw new IllegalStateException("could not delete " + path + ": " + e.getMessage(), e);
         }
     }
 }

@@ -5,7 +5,10 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
-public class CmdUtil {
+public final class CmdUtil {
+
+    private CmdUtil() {
+    }
 
     public static Result runCmd(String[] cmdArray) {
         StringBuilder logStringBuilder = new StringBuilder();
@@ -32,12 +35,7 @@ public class CmdUtil {
 
     public static boolean canRunCmd(String[] cmd) {
         Result result = runCmd(cmd);
-
-        if (result.exception != null) {
-            return false;
-        } else {
-            return true;
-        }
+        return result.exception == null;
     }
 
     public static <T> T[] concat(T[] first, T[] second) {
@@ -85,7 +83,7 @@ public class CmdUtil {
     }
 
     public enum OS {
-        WIN, MAC, _NIX;
+        WIN, MAC, _NIX
     }
 
     public static class Result {

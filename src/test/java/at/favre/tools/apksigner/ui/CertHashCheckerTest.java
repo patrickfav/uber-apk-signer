@@ -7,10 +7,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertNull;
-import static junit.framework.TestCase.assertTrue;
-
+import static junit.framework.TestCase.*;
 
 public class CertHashCheckerTest {
 

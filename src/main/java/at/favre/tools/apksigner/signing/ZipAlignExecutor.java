@@ -15,11 +15,13 @@ import java.util.Set;
  * Responsible for deciding and finding the zipalign executable used by the tool.
  */
 public class ZipAlignExecutor {
-    private enum Location {CUSTOM, PATH, BUILT_IN}
+    private enum Location {
+        CUSTOM, PATH, BUILT_IN
+    }
 
     public static final String ZIPALIGN_NAME = "zipalign";
 
-    public String[] zipAlignExecutable;
+    private String[] zipAlignExecutable;
     private Location location;
     private File tmpFolder;
 
@@ -47,7 +49,7 @@ public class ZipAlignExecutor {
                 if (zipAlignExecutable == null) {
                     CmdUtil.OS osType = CmdUtil.getOsType();
 
-                    String fileName, lib=null;
+                    String fileName, lib = null;
                     if (osType == CmdUtil.OS.WIN) {
                         fileName = "win-zipalign_25_0_0.exe";
                     } else if (osType == CmdUtil.OS.MAC) {
@@ -59,7 +61,7 @@ public class ZipAlignExecutor {
                     }
 
                     tmpFolder = Files.createTempDirectory("uapksigner-").toFile();
-                    File tmpZipAlign = File.createTempFile(fileName, null , tmpFolder);
+                    File tmpZipAlign = File.createTempFile(fileName, null, tmpFolder);
                     Files.copy(getClass().getClassLoader().getResourceAsStream(fileName), tmpZipAlign.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
                     if (osType != CmdUtil.OS.WIN) {
@@ -92,6 +94,10 @@ public class ZipAlignExecutor {
             FileUtil.removeRecursive(tmpFolder.toPath());
             tmpFolder = null;
         }
+    }
+
+    public String[] getZipAlignExecutable() {
+        return zipAlignExecutable;
     }
 
     @Override

@@ -30,7 +30,6 @@ public class MultiKeystoreParser {
                 Map<Integer, String> ksPassArgList = new HashMap<>();
                 Map<Integer, String> ksKeyPassARgList = new HashMap<>();
 
-
                 for (String arg : ksArgs) {
                     Entry entry = parseEntry(arg);
                     ksArgList.put(entry.index, entry.value);

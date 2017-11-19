@@ -52,7 +52,7 @@ public class SigningConfigGen {
                         debugKeystore = sameFolderStore;
                         location = SigningConfig.KeystoreLocation.DEBUG_SAME_FOLDER;
                     }
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             }
 
@@ -104,7 +104,6 @@ public class SigningConfigGen {
                 if (signArgs.alias == null || signArgs.alias.trim().isEmpty()) {
                     throw new IllegalArgumentException("when you provide your own keystore you must pass the keystore alias name");
                 }
-
 
                 Scanner s = new Scanner(System.in);
 

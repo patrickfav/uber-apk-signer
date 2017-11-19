@@ -15,6 +15,7 @@ public class FileArgParserTest {
     File signedFolder, unsignedFolder;
     List<File> sortedSinged, sortedUnsinged;
     private String extFilter = "apk";
+
     @Before
     public void setUp() throws Exception {
         signedFolder = new File(getClass().getClassLoader().getResource("test-apks-signed").toURI().getPath());

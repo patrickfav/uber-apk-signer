@@ -20,10 +20,13 @@ import java.util.Locale;
 /**
  * The main tool that manages the logic of the main process while satisfying the passed arguments
  */
-public class SignTool {
+public final class SignTool {
 
     private static final String ZIPALIGN_ALIGNMENT = "4";
     private static final String APK_FILE_EXTENSION = "apk";
+
+    private SignTool() {
+    }
 
     public static void main(String[] args) {
         Result result = mainExecute(args);
@@ -127,7 +130,6 @@ public class SignTool {
                     log("\tfile: " + rootTargetFile.getCanonicalPath());
                     log("\tchecksum: " + FileUtil.createChecksum(rootTargetFile, "SHA-256") + " (sha256)");
 
-
                     targetApkFile = zipAlign(targetApkFile, rootTargetFile, outFolder, zipAlignExecutor, args, executedCommands);
 
                     if (targetApkFile == null) {
@@ -166,7 +168,6 @@ public class SignTool {
                 }
                 file.delete();
             }
-
 
             log(String.format(Locale.US, "\n[%s][v%s]\nSuccessfully processed %d APKs and %d errors in %.2f seconds.",
                     new Date().toString(), CmdUtil.jarVersion(), successCount, errorCount, (double) (System.currentTimeMillis() - startTime) / 1000.0));
@@ -211,7 +212,7 @@ public class SignTool {
             if (executor.isExecutableFound()) {
                 String logMsg = "\t- ";
 
-                CmdUtil.Result zipAlignResult = CmdUtil.runCmd(CmdUtil.concat(executor.zipAlignExecutable, new String[]{ZIPALIGN_ALIGNMENT, targetApkFile.getAbsolutePath(), outFile.getAbsolutePath()}));
+                CmdUtil.Result zipAlignResult = CmdUtil.runCmd(CmdUtil.concat(executor.getZipAlignExecutable(), new String[]{ZIPALIGN_ALIGNMENT, targetApkFile.getAbsolutePath(), outFile.getAbsolutePath()}));
                 cmdList.add(zipAlignResult);
                 if (zipAlignResult.success()) {
                     logMsg += "zipalign success";
@@ -235,13 +236,12 @@ public class SignTool {
         return targetApkFile;
     }
 
-
     private static boolean verifyZipAlign(File targetApkFile, File rootTargetFile, ZipAlignExecutor executor, Arg arguments, List<CmdUtil.Result> cmdList) {
         if (!arguments.skipZipAlign) {
             if (executor.isExecutableFound()) {
                 String logMsg = "\t- ";
 
-                CmdUtil.Result zipAlignVerifyResult = CmdUtil.runCmd(CmdUtil.concat(executor.zipAlignExecutable, new String[]{"-c", ZIPALIGN_ALIGNMENT, targetApkFile.getAbsolutePath()}));
+                CmdUtil.Result zipAlignVerifyResult = CmdUtil.runCmd(CmdUtil.concat(executor.getZipAlignExecutable(), new String[]{"-c", ZIPALIGN_ALIGNMENT, targetApkFile.getAbsolutePath()}));
                 cmdList.add(zipAlignVerifyResult);
                 boolean success = zipAlignVerifyResult.success();
 
@@ -378,7 +378,6 @@ public class SignTool {
         }
         return sb.toString();
     }
-
 
     private static void logErr(String msg) {
         System.err.println(msg);

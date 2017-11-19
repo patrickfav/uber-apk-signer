@@ -214,6 +214,7 @@ public class SignToolTest {
         assertEquals(0, result.unsuccessful);
         assertEquals(1, result.success);
     }
+
     private static void testAndCheck(String cmd, File originalFolder, File outFolder, List<File> copyApks) throws Exception {
         System.out.println(cmd);
         SignTool.Result result = SignTool.mainExecute(CLIParserTest.asArgArray(cmd));

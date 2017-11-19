@@ -8,6 +8,7 @@ import java.util.List;
  * The model for the passed arguments
  */
 public class Arg {
+    //CHECKSTYLE:OFF -- I do want a concise class with only public access
     public String[] apkFile;
     public String out;
 
@@ -24,6 +25,7 @@ public class Arg {
 
     public String zipAlignPath;
     public String[] checkCertSha256;
+    //CHECKSTYLE:ON
 
     Arg() {
     }
@@ -108,6 +110,7 @@ public class Arg {
                 '}';
     }
 
+    //CHECKSTYLE:OFF
     public static class SignArgs implements Comparable<SignArgs> {
         public int index;
         public String ksFile;
@@ -164,4 +167,5 @@ public class Arg {
             return Integer.valueOf(index).compareTo(o.index);
         }
     }
+    //CHECKSTYLE:ON
 }

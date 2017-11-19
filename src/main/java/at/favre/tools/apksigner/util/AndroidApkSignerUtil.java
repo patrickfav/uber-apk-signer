@@ -7,7 +7,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AndroidApkSignerUtil {
+public final class AndroidApkSignerUtil {
     private AndroidApkSignerUtil() {
     }
 

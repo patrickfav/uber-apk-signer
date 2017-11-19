@@ -194,6 +194,7 @@ public class AndroidApkSignerVerify {
         }
     }
 
+    //CHECKSTYLE:OFF -- I do want a concise class with only public access
     public static class CertInfo {
         public String certSha1;
         public String certSha256;
@@ -206,7 +207,6 @@ public class AndroidApkSignerVerify {
         public int pubKeysize;
         public Date expiry;
         public Date beginValidity;
-
-
     }
+    //CHECKSTYLE:ON
 }
