@@ -11,7 +11,8 @@ before_install:
   - openssl aes-256-cbc -K $encrypted_46a968247833_key -iv $encrypted_46a968247833_iv -in keystore.jks.enc -out keystore.jks -d
 
 script:
-  - mvn clean install -X checkstyle:check
+  - mvn clean install -X
+  - mvn checkstyle:check
 
 after_success:
   - mvn test jacoco:report coveralls:report
