@@ -50,7 +50,13 @@ public class FileArgParser {
             if (file.isDirectory()) {
                 parents.add(file);
             } else {
-                parents.add(file.getParentFile());
+                //Fixed bug: java -jar uber-apk-signer*.jar -a test_unsigned.apk throw NullPointerException
+                try {
+                    file = new File(file.getCanonicalPath());
+                    parents.add(file.getParentFile());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
