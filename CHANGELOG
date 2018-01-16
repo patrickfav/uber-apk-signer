@@ -1,5 +1,8 @@
 # Releases
 
+## v0.8.4
+* add file size info to log output
+
 ## v0.8.3
 * do not use `javax.xml.bind.*` dependencies, that might crash on jre9
 

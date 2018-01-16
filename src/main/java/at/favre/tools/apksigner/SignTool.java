@@ -127,7 +127,7 @@ public final class SignTool {
 
                 if (!args.onlyVerify) {
                     log("\n\tSIGN");
-                    log("\tfile: " + rootTargetFile.getCanonicalPath());
+                    log("\tfile: " + rootTargetFile.getCanonicalPath() + " (" + FileUtil.getFileSizeMb(targetApkFile) + ")");
                     log("\tchecksum: " + FileUtil.createChecksum(rootTargetFile, "SHA-256") + " (sha256)");
 
                     targetApkFile = zipAlign(targetApkFile, rootTargetFile, outFolder, zipAlignExecutor, args, executedCommands);
@@ -145,7 +145,7 @@ public final class SignTool {
                 }
 
                 log("\n\tVERIFY");
-                log("\tfile: " + targetApkFile.getCanonicalPath());
+                log("\tfile: " + targetApkFile.getCanonicalPath() + " (" + FileUtil.getFileSizeMb(targetApkFile) + ")");
                 log("\tchecksum: " + FileUtil.createChecksum(targetApkFile, "SHA-256") + " (sha256)");
 
                 boolean zipAlignVerified = args.skipZipAlign || verifyZipAlign(targetApkFile, rootTargetFile, zipAlignExecutor, args, executedCommands);

@@ -11,6 +11,9 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 public final class FileUtil {
 
@@ -81,6 +84,17 @@ public final class FileUtil {
             });
         } catch (Exception e) {
             throw new IllegalStateException("could not delete " + path + ": " + e.getMessage(), e);
+        }
+    }
+
+    public static String getFileSizeMb(File file) {
+        try {
+            DecimalFormat df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
+            df.applyPattern("0.0#");
+            long fileSizeInBytes = file.length();
+            return df.format(fileSizeInBytes / (1024.0f * 1024.0f)) + " MiB";
+        } catch (Exception e) {
+            return "<null>";
         }
     }
 }
