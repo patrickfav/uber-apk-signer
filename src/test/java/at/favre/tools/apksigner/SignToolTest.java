@@ -68,6 +68,14 @@ public class SignToolTest {
     }
 
     @Test
+    public void testSignSingleApkRelPath() throws Exception {
+        List<File> uApks = copyToTestPath(originalFolder, unsingedApks.subList(0, 1));
+        System.out.println("found " + uApks.size() + " apks in out folder");
+        String cmd = "-" + CLIParser.ARG_APK_FILE + " ./" + originalFolder.listFiles()[0].getName() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN;
+        testAndCheck(cmd, originalFolder, outFolder, uApks);
+    }
+
+    @Test
     public void testSignMultipleApksCustomCert() throws Exception {
         List<File> uApks = copyToTestPath(originalFolder, unsingedApks);
 
