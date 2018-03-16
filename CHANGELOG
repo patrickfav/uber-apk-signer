@@ -1,11 +1,9 @@
 # Releases
 
-## v0.8.5
-* fix nullpointer when using apk file and not dir (thx @yihongyuelan)
-* updates apksigner to v27.0.3
-
 ## v0.8.4
 * add file size info to log output
+* fix nullpointer when using apk file and not dir (thx @yihongyuelan)
+* updates apksigner to v27.0.3
 
 ## v0.8.3
 * do not use `javax.xml.bind.*` dependencies, that might crash on jre9
