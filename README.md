@@ -3,7 +3,7 @@ A tool that helps signing, [zip aligning](https://developer.android.com/studio/c
 
 [![GitHub release](https://img.shields.io/github/release/patrickfav/uber-apk-signer.svg)](https://github.com/patrickfav/uber-apk-signer/releases/latest)
 [![Build Status](https://travis-ci.org/patrickfav/uber-apk-signer.svg?branch=master)](https://travis-ci.org/patrickfav/uber-apk-signer)
-[![Coverage Status](https://coveralls.io/repos/github/patrickfav/uber-apk-signer/badge.svg?branch=master)](https://coveralls.io/github/patrickfav/uber-apk-signer?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/patrickfav/uber-apk-signer/badge.svg?branch=master)](https://coveralls.io/github/patrickfav/uber-apk-signer?branch=master) [![Maintainability](https://api.codeclimate.com/v1/badges/e411436386ab41819b89/maintainability)](https://codeclimate.com/github/patrickfav/uber-apk-signer/maintainability)
 
 Main features:
 
