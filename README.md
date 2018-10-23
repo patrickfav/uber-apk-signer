@@ -156,11 +156,11 @@ The provided JARs in the Github release page are signed with my private key:
 
 Use the jarsigner tool (found in your `$JAVA_HOME/bin` folder) folder to verify.
 
-## Build
+### Build with Maven
 
-Use maven (3.1+) to create a jar including all dependencies
+Use the Maven wrapper to create a jar including all dependencies
 
-    mvn clean package
+    ./mvnw clean install
 
 ## Tech Stack
 
