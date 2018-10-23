@@ -3,6 +3,8 @@
 ## v1.0.0
 
 * updates apksigner to v28.0.3
+* updates maven plugin versions
+* use maven wrapper
 
 ## v0.8.4
 * add file size info to log output
