@@ -3,8 +3,10 @@
 ## v1.0.0
 
 * updates apksigner to v28.0.3
+* update zipalign to 28.0.3 win/linux binary
 * updates maven plugin versions
 * use maven wrapper
+* slightly improved debugging output
 
 ## v0.8.4
 * add file size info to log output

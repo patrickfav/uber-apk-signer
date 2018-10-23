@@ -51,13 +51,13 @@ public class ZipAlignExecutor {
 
                     String fileName, lib = null;
                     if (osType == CmdUtil.OS.WIN) {
-                        fileName = "win-zipalign_25_0_0.exe";
+                        fileName = "win-zipalign_28_0_3.exe";
                     } else if (osType == CmdUtil.OS.MAC) {
                         fileName = "mac-zipalign-24_0_3";
-                        lib = "linux64-libc++-25_0_0.so"; //TODO test if this works on mac
+                        lib = "linux64-libc++-28_0_3.so"; //TODO test if this works on mac
                     } else {
-                        fileName = "linux-zipalign-25_0_0";
-                        lib = "linux64-libc++-25_0_0.so";
+                        fileName = "linux-zipalign-28_0_3";
+                        lib = "linux64-libc++-28_0_3.so";
                     }
 
                     tmpFolder = Files.createTempDirectory("uapksigner-").toFile();

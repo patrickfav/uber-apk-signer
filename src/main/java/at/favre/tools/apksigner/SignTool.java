@@ -216,7 +216,7 @@ public final class SignTool {
             if (executor.isExecutableFound()) {
                 String logMsg = "\t- ";
 
-                CmdUtil.Result zipAlignResult = CmdUtil.runCmd(CmdUtil.concat(executor.getZipAlignExecutable(), new String[]{ZIPALIGN_ALIGNMENT, targetApkFile.getAbsolutePath(), outFile.getAbsolutePath()}));
+                CmdUtil.Result zipAlignResult = CmdUtil.runCmd(CmdUtil.concat(executor.getZipAlignExecutable(), new String[]{"-v", ZIPALIGN_ALIGNMENT, targetApkFile.getAbsolutePath(), outFile.getAbsolutePath()}));
                 cmdList.add(zipAlignResult);
                 if (zipAlignResult.success()) {
                     logMsg += "zipalign success";

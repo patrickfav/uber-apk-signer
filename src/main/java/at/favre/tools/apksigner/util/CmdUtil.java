@@ -101,7 +101,7 @@ public final class CmdUtil {
 
         @Override
         public String toString() {
-            return cmd + "\n" + out + "\n";
+            return cmd + "\n" + out + " (" + exitValue + ")\n";
         }
 
         public boolean success() {
