@@ -1,6 +1,10 @@
 package at.favre.tools.apksigner;
 
-import at.favre.tools.apksigner.signing.*;
+import at.favre.tools.apksigner.signing.AndroidApkSignerVerify;
+import at.favre.tools.apksigner.signing.CertHashChecker;
+import at.favre.tools.apksigner.signing.SigningConfig;
+import at.favre.tools.apksigner.signing.SigningConfigGen;
+import at.favre.tools.apksigner.signing.ZipAlignExecutor;
 import at.favre.tools.apksigner.ui.Arg;
 import at.favre.tools.apksigner.ui.CLIParser;
 import at.favre.tools.apksigner.ui.FileArgParser;
@@ -182,7 +186,7 @@ public final class SignTool {
                 e.printStackTrace();
                 logErr(getCommandHistory(executedCommands));
             } else {
-                logErr("Run with '-debug' parameter to get additional information.");
+                logErr("Run with '--debug' parameter to get additional information.");
             }
             return new Result(true, successCount, errorCount);
         } finally {
