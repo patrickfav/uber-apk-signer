@@ -4,6 +4,7 @@
 
 * support apk signer schema v3 with lineage file support #18
 * updates apksigner to v29.0.2
+* add OSWAP dependency check plugin to Maven POM
 
 ## v1.0.0
 
