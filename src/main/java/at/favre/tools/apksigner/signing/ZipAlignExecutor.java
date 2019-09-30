@@ -55,10 +55,10 @@ public class ZipAlignExecutor {
                         lib = "libwinpthread-1-29_0_2.dll";
                     } else if (osType == CmdUtil.OS.MAC) {
                         fileName = "mac-zipalign-24_0_3";
-                        lib = "linux64-libc++-28_0_3.so"; //TODO test if this works on mac
+                        lib = "linux64-libc++-29_0_2.so"; //TODO test if this works on mac
                     } else {
-                        fileName = "linux-zipalign-28_0_3";
-                        lib = "linux64-libc++-28_0_3.so";
+                        fileName = "linux-zipalign-29_0_2";
+                        lib = "linux64-libc++-29_0_2.so";
                     }
 
                     tmpFolder = Files.createTempDirectory("uapksigner-").toFile();
@@ -71,7 +71,7 @@ public class ZipAlignExecutor {
 
                         Files.setPosixFilePermissions(tmpZipAlign.toPath(), perms);
 
-                        File lib64File = new File(new File(tmpFolder, "lib64"), "libc++.so");
+                        File lib64File = new File(new File(tmpFolder, "lib64"), "linux64-libc++-29_0_2.so");
                         lib64File.mkdirs();
                         Files.setPosixFilePermissions(lib64File.toPath(), perms);
                         Files.copy(getClass().getClassLoader().getResourceAsStream(lib), lib64File.toPath(), StandardCopyOption.REPLACE_EXISTING);
