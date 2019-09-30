@@ -29,7 +29,7 @@ public class SignToolTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-    private File originalFolder, outFolder, testReleaseKs, testDebugKeystore;
+    private File originalFolder, outFolder, testReleaseKs, testDebugKeystore, lineageFile;
 
     private List<File> unsingedApks;
     private List<File> singedApks;
@@ -40,6 +40,7 @@ public class SignToolTest {
         outFolder = temporaryFolder.newFolder("signer-test", "out");
         testReleaseKs = new File(getClass().getClassLoader().getResource("test-release-key.jks").toURI().getPath());
         testDebugKeystore = new File(getClass().getClassLoader().getResource("test-debug.jks").toURI().getPath());
+        lineageFile = new File(getClass().getClassLoader().getResource("test-debug-to-release.lineage").toURI().getPath());
 
         File signedFolder = new File(getClass().getClassLoader().getResource("test-apks-signed").toURI().getPath());
         File unsignedFolder = new File(getClass().getClassLoader().getResource("test-apks-unsigned").toURI().getPath());
@@ -80,7 +81,7 @@ public class SignToolTest {
         List<File> uApks = copyToTestPath(originalFolder, unsingedApks);
 
         String cmd = "-" + CLIParser.ARG_APK_FILE + " " + originalFolder.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT
-                + " " + outFolder.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN
+                + " " + outFolder.getAbsolutePath() + " --lineage " + lineageFile.getAbsolutePath() + " --" + CLIParser.ARG_SKIP_ZIPALIGN
                 + " --debug --ks 1" + MultiKeystoreParser.sep + testReleaseKs.getAbsolutePath() + " 2" + MultiKeystoreParser.sep + testDebugKeystore.getAbsolutePath() + " --ksPass 1" + MultiKeystoreParser.sep + ksPass + " 2" + MultiKeystoreParser.sep + "android --ksKeyPass 1" + MultiKeystoreParser.sep + keyPass + " 2" + MultiKeystoreParser.sep + "android --ksAlias 1" + MultiKeystoreParser.sep + ksAlias + " 2" + MultiKeystoreParser.sep + "androiddebugkey";
         testAndCheck(cmd, originalFolder, outFolder, uApks);
     }

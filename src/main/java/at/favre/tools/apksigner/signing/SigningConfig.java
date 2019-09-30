@@ -32,7 +32,6 @@ public class SigningConfig {
 
     public String description() throws Exception {
         String checksum = FileUtil.createChecksum(keystore, "SHA-256");
-        String desc = "[" + configIndex + "] " + checksum.substring(0, 8) + " " + keystore.getCanonicalPath() + " (" + location + ")";
-        return desc;
+        return "[" + configIndex + "] " + checksum.substring(0, 8) + " " + keystore.getCanonicalPath() + " (" + location + ")";
     }
 }

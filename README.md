@@ -1,5 +1,5 @@
 # Uber Apk Signer
-A tool that helps signing, [zip aligning](https://developer.android.com/studio/command-line/zipalign.html) and verifying multiple Android application packages (APKs) with either debug or provided release certificates (or multiple). It supports [v1 and v2 Android signing scheme](https://developer.android.com/about/versions/nougat/android-7.0.html#apk_signature_v2). Easy and convenient debug signing with embedded debug keystore. Automatically verifies signature and zipalign after every signing.
+A tool that helps signing, [zip aligning](https://developer.android.com/studio/command-line/zipalign.html) and verifying multiple Android application packages (APKs) with either debug or provided release certificates (or multiple). It supports [v1, v2](https://developer.android.com/about/versions/nougat/android-7.0.html#apk_signature_v2) and [v3 Android signing scheme](https://source.android.com/security/apksigning/v3). Easy and convenient debug signing with embedded debug keystore. Automatically verifies signature and zipalign after every signing.
 
 [![GitHub release](https://img.shields.io/github/release/patrickfav/uber-apk-signer.svg)](https://github.com/patrickfav/uber-apk-signer/releases/latest)
 [![Build Status](https://travis-ci.org/patrickfav/uber-apk-signer.svg?branch=master)](https://travis-ci.org/patrickfav/uber-apk-signer)
@@ -10,7 +10,7 @@ Main features:
 * zipalign, (re)signing and verifying of multiple APKs in one step
 * verify signature (with hash check) and zipalign of multiple APKs in one step
 * built-in zipalign & debug keystore for convenient usage
-* supports v1 and v2 android apk singing scheme
+* supports v1, v2 and v3 android apk singing scheme
 * support for multiple signatures for one APK
 * crypto/signing code relied upon official implementation
 
@@ -45,7 +45,7 @@ This should run on any Windows, Mac or Linux machine where Java8+ is installed.
        --debug                        Prints additional info for debugging.
        --dryRun                       Check what apks would be processed without actually doing anything.
     -h,--help                         Prints help docs.
-       --ks <keystore>                The keystore file. If this isn't provided, will try to sign with a debug
+       --ks <keystore>                The keystore file. If this isn't provided, will tryto sign with a debug
                                       keystore. The debug keystore will be searched in the same dir as
                                       execution and 'user_home/.android' folder. If it is not found there a
                                       built-in keystore will be used for convenience. It is possible to pass
@@ -67,6 +67,8 @@ This should run on any Windows, Mac or Linux machine where Java8+ is installed.
                                       a user prompt to enter it. It is possible to pass one or multiple
                                       passwords for multiple keystore configs. The syntax for multiple params
                                       is '<index>=<password>'. Must match the parameters of --ks.
+    -l,--lineage <path>               The lineage file for apk signer schema v3 if more then 1 signature is
+                                      used. See here https://bit.ly/2mh6iAC for more info.
     -o,--out <path>                   Where the aligned/signed apks will be copied to. Must be a folder. Will
                                       create, if it does not exist.
        --overwrite                    Will overwrite/delete the apks in-place
@@ -105,9 +107,9 @@ Provide your own location of your debug keystore
 
     java -jar uber-apk-signer.jar -a /path/to/apks --ksDebug /path/debug.jks
 
-Sign with your multiple release keystores
+Sign with your multiple release keystores (see below on how to create a lineage file)
 
-    java -jar uber-apk-signer.jar -a /path/to/apks --ks 1=/path/release.jks 2=/path/release2.jks --ksAlias 1=my_alias1 2=my_alias2
+    java -jar uber-apk-signer.jar -a /path/to/apks --lineage /path/sig.lineage --ks 1=/path/release.jks 2=/path/release2.jks --ksAlias 1=my_alias1 2=my_alias2
 
 Use multiple locations or files (will ignore duplicate files)
 
@@ -139,11 +141,21 @@ A log message will indicate which one was chosen.
 
 If `--skipZipAlign` is passed no executable is needed.
 
-### v1 and v2 Signing Scheme
+### v1, v2 and Signing Scheme
 
 [Android 7.0 introduces APK Signature Scheme v2](https://developer.android.com/about/versions/nougat/android-7.0.html#apk_signature_v2), a new app-signing scheme that offers faster app install times and more protection against unauthorized alterations to APK files. By default, Android Studio 2.2 and the Android Plugin for Gradle 2.2 sign your app using both APK Signature Scheme v2 and the traditional signing scheme, which uses JAR signing.
 
 [APK Signature Scheme v2 is a whole-file signature scheme](https://source.android.com/security/apksigning/v2.html) that increases verification speed and strengthens integrity guarantees by detecting any changes to the protected parts of the APK. The older jarsigning is called v1 schema.
+
+[APK Signature Scheme v3](https://source.android.com/security/apksigning/v3) is an extension to v2 which allows a new signature lineage feature for key rotation, which basically means it will be possible to change signature keys.
+
+#### Signature Lineage File in Schema v3
+
+This tool does not directly support the creation of lineage files as it is considered a task done very rarely. You can create a lineage file with a sequence of certificates with [Google's `apksigner rotate`](https://developer.android.com/studio/command-line/apksigner.html#options-sign-general) and apply it as `-- lineage` arguments when signing with multiple keystores:
+
+    apksigner rotate --out sig.lineage \
+        --old-signer --ks debug1.keystore --ks-key-alias androiddebugkey \
+        --new-signer --ks debug2.keystore --ks-key-alias androiddebugkey
 
 ## Signed Release Jar
 

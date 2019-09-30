@@ -1,5 +1,6 @@
 package at.favre.tools.apksigner.signing;
 
+import at.favre.lib.bytes.Bytes;
 import com.android.apksig.ApkVerifier;
 
 import java.io.File;
@@ -20,13 +21,11 @@ import java.util.stream.Collectors;
  * Mirrors the logic of the apksigner.jar from google, but provides more structural log output.
  */
 public class AndroidApkSignerVerify {
-    private static final char[] HEX_DIGITS = "0123456789abcdef".toCharArray();
 
     public Result verify(File apk, Integer minSdkVersion, Integer maxSdkVersion, boolean warningsTreatedAsErrors) throws Exception {
         StringBuilder logMsg = new StringBuilder();
         List<CertInfo> certInfoList = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
-        List<String> errors = new ArrayList<>();
 
         ApkVerifier.Builder builder = new ApkVerifier.Builder(apk);
         if (minSdkVersion != null) {
@@ -44,9 +43,10 @@ public class AndroidApkSignerVerify {
             logMsg.append("Verifies\n");
             logMsg.append("Verified using v1 scheme (JAR signing): ").append(apkVerifierResult.isVerifiedUsingV1Scheme());
             logMsg.append("Verified using v2 scheme (APK Signature Scheme v2): ").append(apkVerifierResult.isVerifiedUsingV2Scheme());
+            logMsg.append("Verified using v3 scheme (APK Signature Scheme v3): ").append(apkVerifierResult.isVerifiedUsingV3Scheme());
             logMsg.append("Number of signers: ").append(signerCertificates.size());
 
-            MessageDigest sha256Digners = MessageDigest.getInstance("SHA-256");
+            MessageDigest sha256Digest = MessageDigest.getInstance("SHA-256");
             MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
             iter = signerCertificates.iterator();
 
@@ -59,8 +59,8 @@ public class AndroidApkSignerVerify {
                 certInfo.subjectDn = "Subject: " + x509Certificate.getSubjectDN().toString();
                 certInfo.issuerDn = "Issuer: " + x509Certificate.getIssuerDN().toString();
                 certInfo.sigAlgo = x509Certificate.getSigAlgName();
-                certInfo.certSha1 = encode(sha1Digest.digest(encodedCert));
-                certInfo.certSha256 = encode(sha256Digners.digest(encodedCert));
+                certInfo.certSha1 = Bytes.wrap(sha1Digest.digest(encodedCert)).encodeHex();
+                certInfo.certSha256 = Bytes.wrap(sha256Digest.digest(encodedCert)).encodeHex();
                 certInfo.expiry = x509Certificate.getNotAfter();
                 certInfo.beginValidity = x509Certificate.getNotBefore();
 
@@ -81,86 +81,89 @@ public class AndroidApkSignerVerify {
 
                 certInfo.pubKeysize = keySize;
                 byte[] pubKey = publicKey.getEncoded();
-                certInfo.pubSha1 = encode(sha1Digest.digest(pubKey));
-                certInfo.pubSha256 = encode(sha256Digners.digest(pubKey));
+                certInfo.pubSha1 = Bytes.wrap(sha1Digest.digest(pubKey)).encodeHex();
+                certInfo.pubSha256 = Bytes.wrap(sha256Digest.digest(pubKey)).encodeHex();
                 certInfoList.add(certInfo);
             }
         } else {
             logMsg.append("DOES NOT VERIFY\n");
         }
 
-        errors.addAll(apkVerifierResult.getErrors().stream().map(error -> "ERROR: " + error).collect(Collectors.toList()));
+        List<String> errors = apkVerifierResult.getErrors().stream().map(error -> "ERROR: " + error).collect(Collectors.toList());
 
-        Iterator warningIter = apkVerifierResult.getWarnings().iterator();
+        Iterator resultIter = apkVerifierResult.getWarnings().iterator();
 
-        while (warningIter.hasNext()) {
-            ApkVerifier.IssueWithParams var29 = (ApkVerifier.IssueWithParams) warningIter.next();
+        while (resultIter.hasNext()) {
+            ApkVerifier.IssueWithParams var29 = (ApkVerifier.IssueWithParams) resultIter.next();
             warnings.add("WARNING: " + var29);
         }
 
-        warningIter = apkVerifierResult.getV1SchemeSigners().iterator();
+        resultIter = apkVerifierResult.getV1SchemeSigners().iterator();
 
-        String var32;
-        ApkVerifier.IssueWithParams var33;
-        while (warningIter.hasNext()) {
-            ApkVerifier.Result.V1SchemeSignerInfo var30 = (ApkVerifier.Result.V1SchemeSignerInfo) warningIter.next();
-            var32 = var30.getName();
-            iter = var30.getErrors().iterator();
+        String name;
+        ApkVerifier.IssueWithParams issueWithParams;
+        while (resultIter.hasNext()) {
+            ApkVerifier.Result.V1SchemeSignerInfo signerInfo = (ApkVerifier.Result.V1SchemeSignerInfo) resultIter.next();
+            name = signerInfo.getName();
+            iter = signerInfo.getErrors().iterator();
 
             while (iter.hasNext()) {
-                var33 = (ApkVerifier.IssueWithParams) iter.next();
-                errors.add("ERROR: JAR signer " + var32 + ": " + var33);
+                issueWithParams = (ApkVerifier.IssueWithParams) iter.next();
+                errors.add("ERROR: JAR signer " + name + ": " + issueWithParams);
             }
 
-            iter = var30.getWarnings().iterator();
+            iter = signerInfo.getWarnings().iterator();
 
             while (iter.hasNext()) {
-                var33 = (ApkVerifier.IssueWithParams) iter.next();
-                warnings.add("WARNING: JAR signer " + var33);
+                issueWithParams = (ApkVerifier.IssueWithParams) iter.next();
+                warnings.add("WARNING: JAR signer " + issueWithParams);
             }
         }
 
-        warningIter = apkVerifierResult.getV2SchemeSigners().iterator();
+        resultIter = apkVerifierResult.getV2SchemeSigners().iterator();
 
-        while (warningIter.hasNext()) {
-            ApkVerifier.Result.V2SchemeSignerInfo warningsInfo = (ApkVerifier.Result.V2SchemeSignerInfo) warningIter.next();
-            var32 = "signer #" + (warningsInfo.getIndex() + 1);
-            iter = warningsInfo.getErrors().iterator();
+        while (resultIter.hasNext()) {
+            ApkVerifier.Result.V2SchemeSignerInfo signerInfo = (ApkVerifier.Result.V2SchemeSignerInfo) resultIter.next();
+            name = "signer #" + (signerInfo.getIndex() + 1);
+            iter = signerInfo.getErrors().iterator();
 
             while (iter.hasNext()) {
-                var33 = (ApkVerifier.IssueWithParams) iter.next();
-                errors.add("ERROR: APK Signature Scheme v2 " + var32 + ": " + var33);
+                issueWithParams = (ApkVerifier.IssueWithParams) iter.next();
+                errors.add("ERROR: APK Signature Scheme v2 " + name + ": " + issueWithParams);
             }
 
-            iter = warningsInfo.getWarnings().iterator();
+            iter = signerInfo.getWarnings().iterator();
 
             while (iter.hasNext()) {
-                var33 = (ApkVerifier.IssueWithParams) iter.next();
-                warnings.add("WARNING: APK Signature Scheme v2  " + var32 + ": " + var33);
+                issueWithParams = (ApkVerifier.IssueWithParams) iter.next();
+                warnings.add("WARNING: APK Signature Scheme v2  " + name + ": " + issueWithParams);
+            }
+        }
+
+        resultIter = apkVerifierResult.getV3SchemeSigners().iterator();
+        while (resultIter.hasNext()) {
+            ApkVerifier.Result.V3SchemeSignerInfo signerInfo = (ApkVerifier.Result.V3SchemeSignerInfo) resultIter.next();
+            name = "signer #" + (signerInfo.getIndex() + 1);
+            iter = signerInfo.getErrors().iterator();
+
+            while (iter.hasNext()) {
+                issueWithParams = (ApkVerifier.IssueWithParams) iter.next();
+                errors.add("ERROR: APK Signature Scheme v3 " + name + ": " + issueWithParams);
+            }
+
+            iter = signerInfo.getWarnings().iterator();
+
+            while (iter.hasNext()) {
+                issueWithParams = (ApkVerifier.IssueWithParams) iter.next();
+                warnings.add("WARNING: APK Signature Scheme v3  " + name + ": " + issueWithParams);
             }
         }
 
         if (!verified || warningsTreatedAsErrors && !warnings.isEmpty()) {
-            return new Result(false, warnings, errors, logMsg.toString(), apkVerifierResult.isVerifiedUsingV1Scheme(), apkVerifierResult.isVerifiedUsingV2Scheme(), certInfoList);
+            return new Result(false, warnings, errors, logMsg.toString(), apkVerifierResult.isVerifiedUsingV1Scheme(), apkVerifierResult.isVerifiedUsingV2Scheme(), apkVerifierResult.isVerifiedUsingV3Scheme(), certInfoList);
         }
 
-        return new Result(true, warnings, errors, logMsg.toString(), apkVerifierResult.isVerifiedUsingV1Scheme(), apkVerifierResult.isVerifiedUsingV2Scheme(), certInfoList);
-    }
-
-    private static String encode(byte[] data, int offset, int length) {
-        StringBuilder result = new StringBuilder(length * 2);
-
-        for (int i = 0; i < length; ++i) {
-            byte b = data[offset + i];
-            result.append(HEX_DIGITS[b >>> 4 & 15]);
-            result.append(HEX_DIGITS[b & 15]);
-        }
-
-        return result.toString();
-    }
-
-    private static String encode(byte[] data) {
-        return encode(data, 0, data.length);
+        return new Result(true, warnings, errors, logMsg.toString(), apkVerifierResult.isVerifiedUsingV1Scheme(), apkVerifierResult.isVerifiedUsingV2Scheme(), apkVerifierResult.isVerifiedUsingV3Scheme(), certInfoList);
     }
 
     public static class Result {
@@ -170,20 +173,24 @@ public class AndroidApkSignerVerify {
         public final String log;
         public final boolean v1Schema;
         public final boolean v2Schema;
+        public final boolean v3Schema;
         public final List<CertInfo> certInfoList;
 
-        public Result(boolean verified, List<String> warnings, List<String> errors, String log, boolean v1Schema, boolean v2Schema, List<CertInfo> certInfoList) {
+        public Result(boolean verified, List<String> warnings, List<String> errors, String log, boolean v1Schema, boolean v2Schema, boolean v3Schema, List<CertInfo> certInfoList) {
             this.verified = verified;
             this.warnings = warnings;
             this.errors = errors;
             this.log = log;
             this.v1Schema = v1Schema;
             this.v2Schema = v2Schema;
+            this.v3Schema = v3Schema;
             this.certInfoList = certInfoList;
         }
 
         public String getSchemaVersionInfoString() {
-            return "[" + (v1Schema ? "v1" : "") + (v1Schema && v2Schema ? ", " : "") + (v2Schema ? "v2" : "") + "] ";
+            return "[" + (v1Schema ? "v1" : "")
+                    + (v1Schema && v2Schema ? ", " : "") + (v2Schema ? "v2" : "")
+                    + (v2Schema && v3Schema ? ", " : "") + (v3Schema ? "v3" : "") + "] ";
         }
 
         public String getCertCountString() {

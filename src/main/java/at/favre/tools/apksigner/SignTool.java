@@ -1,10 +1,6 @@
 package at.favre.tools.apksigner;
 
-import at.favre.tools.apksigner.signing.AndroidApkSignerVerify;
-import at.favre.tools.apksigner.signing.CertHashChecker;
-import at.favre.tools.apksigner.signing.SigningConfig;
-import at.favre.tools.apksigner.signing.SigningConfigGen;
-import at.favre.tools.apksigner.signing.ZipAlignExecutor;
+import at.favre.tools.apksigner.signing.*;
 import at.favre.tools.apksigner.ui.Arg;
 import at.favre.tools.apksigner.ui.CLIParser;
 import at.favre.tools.apksigner.ui.FileArgParser;
@@ -84,16 +80,27 @@ public final class SignTool {
                 }
             }
 
+
             if (!args.skipZipAlign) {
                 zipAlignExecutor = new ZipAlignExecutor(args);
                 log(zipAlignExecutor.toString());
             }
+
             if (!args.onlyVerify) {
                 log("keystore:");
                 signingConfigGen = new SigningConfigGen(args.signArgsList, args.ksIsDebug);
                 for (SigningConfig signingConfig : signingConfigGen.signingConfig) {
                     log("\t" + signingConfig.description());
                 }
+            }
+
+            if (args.lineageFilePath != null) {
+                File lineageFile = new File(args.lineageFilePath);
+                if (!lineageFile.exists() || !lineageFile.isFile()) {
+                    throw new IllegalArgumentException("lineage file either does not exist or is not a file: " + args.lineageFilePath);
+                }
+                log("lineage:");
+                log("\t" + FileUtil.createChecksum(lineageFile, "SHA-256").substring(0, 8) + " " + lineageFile.getCanonicalPath());
             }
 
             long startTime = System.currentTimeMillis();

@@ -38,6 +38,9 @@ public final class CLIParser {
             argument.zipAlignPath = commandLine.getOptionValue("zipAlignPath");
             argument.out = commandLine.getOptionValue(ARG_APK_OUT);
 
+            if (commandLine.hasOption("lineage")) {
+                argument.lineageFilePath = commandLine.getOptionValue("lineage");
+            }
             if (commandLine.hasOption("ksDebug") && commandLine.hasOption("ks")) {
                 throw new IllegalArgumentException("Either provide normal keystore or debug keystore location, not both.");
             }
@@ -82,6 +85,7 @@ public final class CLIParser {
                 "multiple locations space seperated (can be mixed file folder): '/apk /apks2 my.apk'. Folder will be checked non-recursively.").build();
         Option outOpt = Option.builder(ARG_APK_OUT).longOpt("out").argName("path").hasArg().desc("Where the aligned/signed apks will be copied " +
                 "to. Must be a folder. Will create, if it does not exist.").build();
+        Option lineagePath = Option.builder("l").longOpt("lineage").argName("path").hasArg().desc("The lineage file for apk signer schema v3 if more then 1 signature is used. See here https://bit.ly/2mh6iAC for more info.").build();
 
         Option ksOpt = Option.builder().longOpt("ks").argName("keystore").hasArgs().desc("The keystore file. If this isn't provided, will try" +
                 "to sign with a debug keystore. The debug keystore will be searched in the same dir as execution and 'user_home/.android' folder. " +
@@ -126,7 +130,7 @@ public final class CLIParser {
         options.addOptionGroup(mainArgs);
         options.addOption(ksOpt).addOption(ksPassOpt).addOption(ksKeyPassOpt).addOption(ksAliasOpt).addOption(verifyOnlyOpt)
                 .addOption(dryRunOpt).addOption(skipZipOpt).addOption(overwriteOpt).addOption(verboseOpt).addOption(debugOpt)
-                .addOption(zipAlignPathOpt).addOption(outOpt).addOption(ksDebugOpt).addOption(resignOpt).addOption(checkSh256Opt);
+                .addOption(zipAlignPathOpt).addOption(outOpt).addOption(lineagePath).addOption(ksDebugOpt).addOption(resignOpt).addOption(checkSh256Opt);
 
         return options;
     }

@@ -3,6 +3,7 @@ package at.favre.tools.apksigner.ui;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The model for the passed arguments
@@ -13,6 +14,7 @@ public class Arg {
     public String out;
 
     public List<SignArgs> signArgsList = new ArrayList<>();
+    public String lineageFilePath;
 
     public boolean overwrite = false;
     public boolean dryRun = false;
@@ -32,7 +34,7 @@ public class Arg {
 
     Arg(String[] apkFile, String out, List<SignArgs> list,
         boolean overwrite, boolean dryRun, boolean verbose, boolean skipZipAlign, boolean debug, boolean onlyVerify,
-        String zipAlignPath, boolean ksIsDebug, boolean allowResign, String[] checkCertSha256) {
+        String zipAlignPath, boolean ksIsDebug, boolean allowResign, String[] checkCertSha256, String lineageFilePath) {
         this.apkFile = apkFile;
         this.out = out;
         this.signArgsList = list;
@@ -46,47 +48,34 @@ public class Arg {
         this.ksIsDebug = ksIsDebug;
         this.allowResign = allowResign;
         this.checkCertSha256 = checkCertSha256;
+        this.lineageFilePath = lineageFilePath;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         Arg arg = (Arg) o;
-
-        if (overwrite != arg.overwrite) return false;
-        if (dryRun != arg.dryRun) return false;
-        if (verbose != arg.verbose) return false;
-        if (skipZipAlign != arg.skipZipAlign) return false;
-        if (debug != arg.debug) return false;
-        if (onlyVerify != arg.onlyVerify) return false;
-        if (ksIsDebug != arg.ksIsDebug) return false;
-        if (allowResign != arg.allowResign) return false;
-        // Probably incorrect - comparing Object[] arrays with Arrays.equals
-        if (!Arrays.equals(apkFile, arg.apkFile)) return false;
-        if (out != null ? !out.equals(arg.out) : arg.out != null) return false;
-        if (signArgsList != null ? !signArgsList.equals(arg.signArgsList) : arg.signArgsList != null) return false;
-        if (zipAlignPath != null ? !zipAlignPath.equals(arg.zipAlignPath) : arg.zipAlignPath != null) return false;
-        // Probably incorrect - comparing Object[] arrays with Arrays.equals
-        return Arrays.equals(checkCertSha256, arg.checkCertSha256);
-
+        return overwrite == arg.overwrite &&
+                dryRun == arg.dryRun &&
+                verbose == arg.verbose &&
+                skipZipAlign == arg.skipZipAlign &&
+                debug == arg.debug &&
+                onlyVerify == arg.onlyVerify &&
+                ksIsDebug == arg.ksIsDebug &&
+                allowResign == arg.allowResign &&
+                Arrays.equals(apkFile, arg.apkFile) &&
+                Objects.equals(out, arg.out) &&
+                Objects.equals(signArgsList, arg.signArgsList) &&
+                Objects.equals(lineageFilePath, arg.lineageFilePath) &&
+                Objects.equals(zipAlignPath, arg.zipAlignPath) &&
+                Arrays.equals(checkCertSha256, arg.checkCertSha256);
     }
 
     @Override
     public int hashCode() {
-        int result = Arrays.hashCode(apkFile);
-        result = 31 * result + (out != null ? out.hashCode() : 0);
-        result = 31 * result + (signArgsList != null ? signArgsList.hashCode() : 0);
-        result = 31 * result + (overwrite ? 1 : 0);
-        result = 31 * result + (dryRun ? 1 : 0);
-        result = 31 * result + (verbose ? 1 : 0);
-        result = 31 * result + (skipZipAlign ? 1 : 0);
-        result = 31 * result + (debug ? 1 : 0);
-        result = 31 * result + (onlyVerify ? 1 : 0);
-        result = 31 * result + (ksIsDebug ? 1 : 0);
-        result = 31 * result + (allowResign ? 1 : 0);
-        result = 31 * result + (zipAlignPath != null ? zipAlignPath.hashCode() : 0);
+        int result = Objects.hash(out, signArgsList, lineageFilePath, overwrite, dryRun, verbose, skipZipAlign, debug, onlyVerify, ksIsDebug, allowResign, zipAlignPath);
+        result = 31 * result + Arrays.hashCode(apkFile);
         result = 31 * result + Arrays.hashCode(checkCertSha256);
         return result;
     }
@@ -97,6 +86,7 @@ public class Arg {
                 "apkFile=" + Arrays.toString(apkFile) +
                 ", out='" + out + '\'' +
                 ", signArgsList=" + signArgsList +
+                ", lineageFile='" + lineageFilePath + '\'' +
                 ", overwrite=" + overwrite +
                 ", dryRun=" + dryRun +
                 ", verbose=" + verbose +

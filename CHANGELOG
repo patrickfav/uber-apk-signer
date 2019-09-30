@@ -1,5 +1,10 @@
 # Releases
 
+## v1.1.0
+
+* support apk signer schema v3 with lineage file support #18
+* updates apksigner to v29.0.2
+
 ## v1.0.0
 
 * updates apksigner to v28.0.3

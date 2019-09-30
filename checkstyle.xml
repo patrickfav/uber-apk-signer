@@ -89,7 +89,7 @@
             <property name="max" value="300"/>
         </module>
         <module name="MethodLength"><!-- max line length for single method http://checkstyle.sourceforge.net/config_sizes.html#MethodLength -->
-            <property name="max" value="150"/>
+            <property name="max" value="200"/>
         </module>
         <module name="AnonInnerLength"><!-- max line length for anon class http://checkstyle.sourceforge.net/config_sizes.html#AnonInnerLength -->
             <property name="max" value="85"/>

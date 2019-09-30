@@ -19,6 +19,11 @@ public final class AndroidApkSignerUtil {
             args.add("--verbose");
         }
 
+        if (arguments.lineageFilePath != null) {
+            args.add("--lineage");
+            args.add(arguments.lineageFilePath);
+        }
+
         for (int i = 0; i < list.size(); i++) {
             args.add("--ks");
             args.add(list.get(i).keystore.getAbsolutePath());

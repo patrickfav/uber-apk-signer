@@ -51,7 +51,8 @@ public class ZipAlignExecutor {
 
                     String fileName, lib = null;
                     if (osType == CmdUtil.OS.WIN) {
-                        fileName = "win-zipalign_28_0_3.exe";
+                        fileName = "win-zipalign_29_0_2.exe";
+                        lib = "libwinpthread-1-29_0_2.dll";
                     } else if (osType == CmdUtil.OS.MAC) {
                         fileName = "mac-zipalign-24_0_3";
                         lib = "linux64-libc++-28_0_3.so"; //TODO test if this works on mac
@@ -74,6 +75,8 @@ public class ZipAlignExecutor {
                         lib64File.mkdirs();
                         Files.setPosixFilePermissions(lib64File.toPath(), perms);
                         Files.copy(getClass().getClassLoader().getResourceAsStream(lib), lib64File.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    } else {
+                        Files.copy(getClass().getClassLoader().getResourceAsStream(lib), new File(tmpFolder, "libwinpthread-1.dll").toPath(), StandardCopyOption.REPLACE_EXISTING);
                     }
 
                     zipAlignExecutable = new String[]{tmpZipAlign.getAbsolutePath()};
