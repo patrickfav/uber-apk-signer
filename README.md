@@ -141,7 +141,7 @@ A log message will indicate which one was chosen.
 
 If `--skipZipAlign` is passed no executable is needed.
 
-### v1, v2 and Signing Scheme
+### v1, v2 and v3 Signing Scheme
 
 [Android 7.0 introduces APK Signature Scheme v2](https://developer.android.com/about/versions/nougat/android-7.0.html#apk_signature_v2), a new app-signing scheme that offers faster app install times and more protection against unauthorized alterations to APK files. By default, Android Studio 2.2 and the Android Plugin for Gradle 2.2 sign your app using both APK Signature Scheme v2 and the traditional signing scheme, which uses JAR signing.
 
@@ -156,6 +156,8 @@ This tool does not directly support the creation of lineage files as it is consi
     apksigner rotate --out sig.lineage \
         --old-signer --ks debug1.keystore --ks-key-alias androiddebugkey \
         --new-signer --ks debug2.keystore --ks-key-alias androiddebugkey
+
+    java -jar uber-apk-signer.jar -a /path/to/apks --lineage sig.lineage (...)
 
 ## Signed Release Jar
 
