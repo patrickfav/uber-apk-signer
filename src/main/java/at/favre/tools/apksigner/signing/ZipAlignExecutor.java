@@ -54,8 +54,8 @@ public class ZipAlignExecutor {
                         fileName = "win-zipalign_29_0_2.exe";
                         lib = "libwinpthread-1-29_0_2.dll";
                     } else if (osType == CmdUtil.OS.MAC) {
-                        fileName = "mac-zipalign-24_0_3";
-                        lib = "linux64-libc++-29_0_2.so"; //TODO test if this works on mac
+                        fileName = "mac-zipalign-29_0_2";
+                        lib = "linux64-libc++-29_0_2.so";
                     } else {
                         fileName = "linux-zipalign-29_0_2";
                         lib = "linux64-libc++-29_0_2.so";
