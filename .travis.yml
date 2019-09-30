@@ -2,6 +2,7 @@
 #    git update-index --chmod=+x mvnw
 
 sudo: false # route your build to the container-based infrastructure for a faster build
+language: java
 jdk:
   - openjdk8
 
