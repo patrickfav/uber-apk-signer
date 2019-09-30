@@ -71,7 +71,7 @@ public class ZipAlignExecutor {
 
                         Files.setPosixFilePermissions(tmpZipAlign.toPath(), perms);
 
-                        File lib64File = new File(new File(tmpFolder, "lib64"), "linux64-libc++-29_0_2.so");
+                        File lib64File = new File(new File(tmpFolder, "lib64"), "libc++.so");
                         lib64File.mkdirs();
                         Files.setPosixFilePermissions(lib64File.toPath(), perms);
                         Files.copy(getClass().getClassLoader().getResourceAsStream(lib), lib64File.toPath(), StandardCopyOption.REPLACE_EXISTING);
