@@ -13,13 +13,15 @@
         <property name="max" value="1500"/>
     </module>
 
+    <module name="LineLength"><!-- max char length per line http://checkstyle.sourceforge.net/config_sizes.html#LineLength -->
+        <property name="max" value="300"/>
+    </module>
+
     <module name="TreeWalker">
         <module name="SuppressionCommentFilter"/> <!-- use //CHECKSTYLE:OFF (...) //CHECKSTYLE:ON to disable checkstyle: http://checkstyle.sourceforge.net/config_filters.html#SuppressionCommentFilter -->
 
         <!-- Annotations -->
-        <module name="MissingDeprecated"> <!-- if @deprecated and javadoc is there, must be explained in javadoc: http://checkstyle.sourceforge.net/config_annotation.html#MissingDeprecated -->
-            <property name="skipNoJavadoc" value="true"/>
-        </module>
+        <module name="MissingDeprecated"/> <!-- if @deprecated and javadoc is there, must be explained in javadoc: http://checkstyle.sourceforge.net/config_annotation.html#MissingDeprecated -->
         <module name="MissingOverride"/> <!-- if has @inheritDoc in javadoc must have @Override http://checkstyle.sourceforge.net/config_annotation.html#MissingOverride -->
         <module name="PackageAnnotation"/> <!-- must only be in package-info: http://checkstyle.sourceforge.net/config_annotation.html#PackageAnnotation -->
 
@@ -85,9 +87,7 @@
         <module name="IllegalInstantiation"/> <!-- Must not use const of certain types (Activity, Fragment): http://checkstyle.sourceforge.net/config_coding.html#IllegalInstantiation -->
 
         <!-- Size Limitiations -->
-        <module name="LineLength"><!-- max char length per line http://checkstyle.sourceforge.net/config_sizes.html#LineLength -->
-            <property name="max" value="300"/>
-        </module>
+
         <module name="MethodLength"><!-- max line length for single method http://checkstyle.sourceforge.net/config_sizes.html#MethodLength -->
             <property name="max" value="200"/>
         </module>
