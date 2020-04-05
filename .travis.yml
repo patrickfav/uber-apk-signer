@@ -16,7 +16,6 @@ before_install:
 
 script:
   - ./mvnw clean install
-  - ./mvnw checkstyle:check
 
 after_success:
 - ./mvnw test jacoco:report coveralls:report
