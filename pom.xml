@@ -4,22 +4,21 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>at.favre.lib</groupId>
+        <artifactId>common-parent</artifactId>
+        <version>5</version>
+    </parent>
+
     <groupId>at.favre.tools</groupId>
     <artifactId>uber-apk-signer</artifactId>
     <version>1.1.0</version>
 
-    <prerequisites>
-        <maven>3.1.0</maven>
-    </prerequisites>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    </properties>
     <repositories>
         <repository>
-            <id>maven-central-repo</id>
-            <url>http://repo1.maven.org/maven2</url>
+            <id>jcenter</id>
+            <name>jcenter</name>
+            <url>https://jcenter.bintray.com</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
@@ -31,53 +30,20 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.1.1</version>
-                <configuration>
-                    <configLocation>checkstyle.xml</configLocation>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>validate</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.puppycrawl.tools</groupId>
-                        <artifactId>checkstyle</artifactId>
-                        <version>8.31</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.2</version>
                 <configuration>
                     <excludes>
                         <!-- excludes system scoped dependencies -->
                         <exclude>**/lib/**</exclude>
                     </excludes>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>prepare-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.eluder.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
-                <version>4.3.0</version>
-                <configuration>
-                    <dryRun>false</dryRun>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -137,21 +103,10 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--            <plugin>-->
-            <!--                <groupId>org.owasp</groupId>-->
-            <!--                <artifactId>dependency-check-maven</artifactId>-->
-            <!--                <version>5.0.0-M1</version>-->
-            <!--                <configuration>-->
-            <!--                    <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>-->
-            <!--                </configuration>-->
-            <!--                <executions>-->
-            <!--                    <execution>-->
-            <!--                        <goals>-->
-            <!--                            <goal>check</goal>-->
-            <!--                        </goals>-->
-            <!--                    </execution>-->
-            <!--                </executions>-->
-            <!--            </plugin>-->
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+            </plugin>
             <plugin>
                 <groupId>com.googlecode.addjars-maven-plugin</groupId>
                 <artifactId>addjars-maven-plugin</artifactId>
@@ -174,43 +129,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jarsigner-plugin</artifactId>
-                <version>1.4</version>
-                <executions>
-                    <execution>
-                        <id>sign</id>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
-                    <skip>false</skip> <!-- set this to true if fail because of missing credentials -->
                     <keystore>${project.basedir}/keystore.jks</keystore>
-                    <alias>pfopensource</alias>
-                    <storepass>${env.OPENSOURCE_PROJECTS_KS_PW}</storepass>
-                    <keypass>${env.OPENSOURCE_PROJECTS_KEY_PW}</keypass>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>net.nicoulaj.maven.plugins</groupId>
                 <artifactId>checksum-maven-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>artifacts</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <algorithms>
-                        <algorithm>SHA-256</algorithm>
-                    </algorithms>
-                    <shasumSummary>true</shasumSummary>
-                    <shasumSummaryFile>checksum-sha256.txt</shasumSummaryFile>
-                    <attachChecksums>false</attachChecksums>
-                    <quiet>false</quiet>
-                </configuration>
             </plugin>
             <!--<plugin>-->
             <!--<groupId>com.akathist.maven.plugins.launch4j</groupId>-->
@@ -283,8 +208,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <type>jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>

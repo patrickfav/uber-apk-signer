@@ -11,6 +11,7 @@ import com.android.apksigner.ApkSignerTool;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -95,12 +96,7 @@ public final class SignTool {
             }
 
             if (args.lineageFilePath != null) {
-                File lineageFile = new File(args.lineageFilePath);
-                if (!lineageFile.exists() || !lineageFile.isFile()) {
-                    throw new IllegalArgumentException("lineage file either does not exist or is not a file: " + args.lineageFilePath);
-                }
-                log("lineage:");
-                log("\t" + FileUtil.createChecksum(lineageFile, "SHA-256").substring(0, 8) + " " + lineageFile.getCanonicalPath());
+                processLineagePath(args);
             }
 
             long startTime = System.currentTimeMillis();
@@ -173,12 +169,7 @@ public final class SignTool {
                 log("No apks found.");
             }
 
-            for (File file : tempFilesToDelete) {
-                if (args.verbose) {
-                    log("delete temp file " + file);
-                }
-                file.delete();
-            }
+            deleteTempFiles(args, tempFilesToDelete);
 
             log(String.format(Locale.US, "\n[%s][v%s]\nSuccessfully processed %d APKs and %d errors in %.2f seconds.",
                     new Date().toString(), CmdUtil.jarVersion(), successCount, errorCount, (double) (System.currentTimeMillis() - startTime) / 1000.0));
@@ -187,25 +178,51 @@ public final class SignTool {
                 log(getCommandHistory(executedCommands));
             }
         } catch (Exception e) {
-            logErr(e.getMessage());
-
-            if (args.debug) {
-                e.printStackTrace();
-                logErr(getCommandHistory(executedCommands));
-            } else {
-                logErr("Run with '--debug' parameter to get additional information.");
-            }
+            logException(args, executedCommands, e);
             return new Result(true, successCount, errorCount);
         } finally {
-            if (zipAlignExecutor != null) {
-                zipAlignExecutor.cleanUp();
-            }
-
-            if (signingConfigGen != null) {
-                signingConfigGen.cleanUp();
-            }
+            cleanup(zipAlignExecutor, signingConfigGen);
         }
         return new Result(false, successCount, errorCount);
+    }
+
+    private static void processLineagePath(Arg args) throws IOException {
+        File lineageFile = new File(args.lineageFilePath);
+        if (!lineageFile.exists() || !lineageFile.isFile()) {
+            throw new IllegalArgumentException("lineage file either does not exist or is not a file: " + args.lineageFilePath);
+        }
+        log("lineage:");
+        log("\t" + FileUtil.createChecksum(lineageFile, "SHA-256").substring(0, 8) + " " + lineageFile.getCanonicalPath());
+    }
+
+    private static void deleteTempFiles(Arg args, List<File> tempFilesToDelete) {
+        for (File file : tempFilesToDelete) {
+            if (args.verbose) {
+                log("delete temp file " + file);
+            }
+            file.delete();
+        }
+    }
+
+    private static void cleanup(ZipAlignExecutor zipAlignExecutor, SigningConfigGen signingConfigGen) {
+        if (zipAlignExecutor != null) {
+            zipAlignExecutor.cleanUp();
+        }
+
+        if (signingConfigGen != null) {
+            signingConfigGen.cleanUp();
+        }
+    }
+
+    private static void logException(Arg args, List<CmdUtil.Result> executedCommands, Exception e) {
+        logErr(e.getMessage());
+
+        if (args.debug) {
+            e.printStackTrace();
+            logErr(getCommandHistory(executedCommands));
+        } else {
+            logErr("Run with '--debug' parameter to get additional information.");
+        }
     }
 
     private static File zipAlign(File targetApkFile, File rootTargetFile, File outFolder, ZipAlignExecutor executor, Arg arguments, List<CmdUtil.Result> cmdList) {
