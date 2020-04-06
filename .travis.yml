@@ -27,7 +27,7 @@ deploy:
   file:
   - "target/uber-apk-signer-*.jar"
   - "target/checksum*"
-  cleanup: true
+  cleanup: false
   on:
     branch: master
     tags: true
