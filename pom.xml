@@ -7,7 +7,7 @@
     <parent>
         <groupId>at.favre.lib</groupId>
         <artifactId>common-parent</artifactId>
-        <version>6</version>
+        <version>7</version>
     </parent>
 
     <groupId>at.favre.tools</groupId>
@@ -201,4 +201,21 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <scm>
+        <connection>https://github.com/patrickfav/uber-apk-signer.git</connection>
+        <developerConnection>https://github.com/patrickfav/uber-apk-signer.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/patrickfav/uber-apk-signer</url>
+    </scm>
+
+    <issueManagement>
+        <system>Github</system>
+        <url>https://github.com/patrickfav/uber-apk-signer/issues</url>
+    </issueManagement>
+
+    <ciManagement>
+        <system>Travis</system>
+        <url>https://travis-ci.org/patrickfav/uber-apk-signer</url>
+    </ciManagement>
 </project>
