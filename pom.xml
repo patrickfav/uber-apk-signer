@@ -24,7 +24,6 @@
             </snapshots>
         </repository>
     </repositories>
-
     <build>
         <plugins>
             <plugin>
@@ -34,6 +33,8 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <!-- this version is required, otherwise jacoco fails (tested with 0.8.5) -->
+                <version>0.8.2</version>
                 <configuration>
                     <excludes>
                         <!-- excludes system scoped dependencies -->
