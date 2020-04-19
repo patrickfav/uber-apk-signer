@@ -7,12 +7,16 @@
     <parent>
         <groupId>at.favre.lib</groupId>
         <artifactId>common-parent</artifactId>
-        <version>11</version>
+        <version>12</version>
     </parent>
 
     <groupId>at.favre.tools</groupId>
     <artifactId>uber-apk-signer</artifactId>
     <version>1.1.0</version>
+
+    <properties>
+        <commonConfig.jarSign.skip>false</commonConfig.jarSign.skip>
+    </properties>
 
     <repositories>
         <repository>
@@ -24,11 +28,12 @@
             </snapshots>
         </repository>
     </repositories>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
+                <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
