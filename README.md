@@ -18,11 +18,11 @@ Basic usage:
 
     java -jar uber-apk-signer.jar --apks /path/to/apks
 
-This should run on any Windows, Mac or Linux machine where Java8+ is installed. 
+This should run on any Windows, Mac or Linux machine where Java11+ is installed. 
 
 ### Requirements
 
-* JDK 8
+* JDK 11
 * Currently on Linux 32bit: zipalign must be set in `PATH`
 
 ## Download
