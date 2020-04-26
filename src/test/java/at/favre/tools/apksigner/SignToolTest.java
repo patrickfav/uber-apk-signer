@@ -6,6 +6,7 @@ import at.favre.tools.apksigner.ui.CLIParserTest;
 import at.favre.tools.apksigner.ui.MultiKeystoreParser;
 import at.favre.tools.apksigner.util.FileUtil;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -20,6 +21,7 @@ import java.util.List;
 import static junit.framework.TestCase.*;
 
 @SuppressWarnings("ALL")
+@Ignore
 public class SignToolTest {
     private final static String ksAlias = "app";
     private final static String ksPass = "password";
