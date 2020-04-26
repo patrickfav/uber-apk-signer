@@ -176,6 +176,22 @@ Use the Maven wrapper to create a jar including all dependencies
 
     ./mvnw clean install
 
+### Update apksigner Dependency
+
+This project uses a manual copy of `apksigner.jar` from the Android SDK. To be able to use it in this project, a local maven repo will be 
+created and referenced in the main POM. To update the jar execute the following command:
+
+```bash
+mvn install:install-file -Dfile=src/main/resources/lib/apksigner_29_0_2.jar \
+    -DgroupId=com.android \ 
+    -DartifactId=apksigner \
+    -Dversion=29.0.2 \
+    -Dpackaging=jar \
+    -DlocalRepositoryPath=.mvn/repository
+```
+
+Where `apksigner_29_0_2.jar` is the new jar and `29.0.2` the respective version. Don't forget to update the version in the POM's dependency section as well. See this [SO Post](https://stackoverflow.com/questions/41661895/running-spring-boot-for-rest).
+
 ### Checkstyle Config File
 
 This project uses my [`common-parent`](https://github.com/patrickfav/mvn-common-parent) which centralized a lot of

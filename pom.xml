@@ -7,7 +7,7 @@
     <parent>
         <groupId>at.favre.lib</groupId>
         <artifactId>common-parent</artifactId>
-        <version>12</version>
+        <version>13</version>
     </parent>
 
     <groupId>at.favre.tools</groupId>
@@ -15,10 +15,15 @@
     <version>1.1.0</version>
 
     <properties>
-        <commonConfig.jarSign.skip>false</commonConfig.jarSign.skip>
+        <commonConfig.jarSign.skip>true</commonConfig.jarSign.skip>
+        <commonConfig.jacoco.check.disable>true</commonConfig.jacoco.check.disable>
     </properties>
 
     <repositories>
+        <repository>
+            <id>project-local-repo</id>
+            <url>file://${project.basedir}/.mvn/repository</url>
+        </repository>
         <repository>
             <id>jcenter</id>
             <name>jcenter</name>
@@ -36,18 +41,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <!-- this version is required, otherwise jacoco fails (tested with 0.8.5) -->
-                <version>0.8.2</version>
-                <configuration>
-                    <excludes>
-                        <!-- excludes system scoped dependencies -->
-                        <exclude>**/lib/**</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.eluder.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
             </plugin>
@@ -58,7 +51,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.2.3</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -77,13 +70,15 @@
                                         <Implementation-Version>${project.version}</Implementation-Version>
                                     </manifestEntries>
                                 </transformer>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
-                                    <resources>
-                                        <resource>/lib</resource>
-                                    </resources>
-                                </transformer>
                             </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>
@@ -93,25 +88,6 @@
                 <artifactId>dependency-check-maven</artifactId>
             </plugin>
             <plugin>
-                <groupId>com.googlecode.addjars-maven-plugin</groupId>
-                <artifactId>addjars-maven-plugin</artifactId>
-                <version>1.0.5</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>add-jars</goal>
-                        </goals>
-                        <configuration>
-                            <resources>
-                                <resource>
-                                    <directory>${project.basedir}/src/main/resources/lib</directory>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jarsigner-plugin</artifactId>
             </plugin>
@@ -119,51 +95,6 @@
                 <groupId>net.nicoulaj.maven.plugins</groupId>
                 <artifactId>checksum-maven-plugin</artifactId>
             </plugin>
-            <!--<plugin>-->
-            <!--<groupId>com.akathist.maven.plugins.launch4j</groupId>-->
-            <!--<artifactId>launch4j-maven-plugin</artifactId>-->
-            <!--<version>1.7.15</version>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<id>l4j-clui</id>-->
-            <!--<phase>package</phase>-->
-            <!--<goals>-->
-            <!--<goal>launch4j</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-            <!--<headerType>console</headerType>-->
-            <!--<outfile>target/usigner.exe</outfile>-->
-            <!--&lt;!&ndash;<icon>icon.ico</icon>&ndash;&gt;-->
-            <!--<jar>target/uber-apk-signer-${project.version}.jar</jar>-->
-            <!--<errTitle>uber-apk-signer</errTitle>-->
-            <!--<classPath>-->
-            <!--<mainClass>at.favre.tools.apksigner.SignTool</mainClass>-->
-            <!--<addDependencies>true</addDependencies>-->
-            <!--<preCp>anything</preCp>-->
-            <!--</classPath>-->
-            <!--<jre>-->
-            <!--<minVersion>1.8.0</minVersion>-->
-            <!--<opts>-->
-            <!--<opt>-Djava.endorsed.dirs=./endorsed</opt>-->
-            <!--</opts>-->
-            <!--</jre>-->
-            <!--<versionInfo>-->
-            <!--<fileVersion>0.0.0.1</fileVersion>-->
-            <!--<txtFileVersion>0.0.0.1</txtFileVersion>-->
-            <!--<fileDescription>A tool that enables advanced features through adb-->
-            <!--</fileDescription>-->
-            <!--<copyright>Patrick Favre-Bulle, 2016</copyright>-->
-            <!--<productVersion>${project.version}.0</productVersion>-->
-            <!--<txtProductVersion>${project.version}</txtProductVersion>-->
-            <!--<productName>Uber Apk Signer</productName>-->
-            <!--<internalName>uber-apk-signer</internalName>-->
-            <!--<originalFilename>usigner.exe</originalFilename>-->
-            <!--<language>EN</language>-->
-            <!--</versionInfo>-->
-            <!--</configuration>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
         </plugins>
     </build>
 
@@ -177,9 +108,7 @@
         <dependency>
             <groupId>com.android</groupId>
             <artifactId>apksigner</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/apksigner_29_0_2.jar</systemPath>
+            <version>29.0.2</version>
         </dependency>
         <dependency>
             <groupId>at.favre.lib</groupId>
