@@ -1,5 +1,11 @@
 # Releases
 
+## v1.2.0
+
+* fix using 'outfile.zip should use the same page alignment for all shared object files within infile.zip' by providing correct flag to zipalign (thx @subho007)
+* fix some minor vulnerabilities in tests
+* update maven dependencies & plugins
+
 ## v1.1.0
 
 * support apk signer schema v3 with lineage file support #18
