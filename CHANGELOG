@@ -1,5 +1,9 @@
 # Releases
 
+## v1.2.1
+
+* minor: fix using incorrect version number
+
 ## v1.2.0
 
 * fix using 'outfile.zip should use the same page alignment for all shared object files within infile.zip' by providing correct flag to zipalign (thx @subho007)
