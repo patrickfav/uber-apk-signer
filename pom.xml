@@ -216,6 +216,6 @@
 
     <ciManagement>
         <system>Travis</system>
-        <url>https://travis-ci.org/patrickfav/uber-apk-signer</url>
+        <url>https://travis-ci.com/patrickfav/uber-apk-signer</url>
     </ciManagement>
 </project>
