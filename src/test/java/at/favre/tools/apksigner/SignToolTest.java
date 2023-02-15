@@ -48,10 +48,10 @@ public class SignToolTest {
 
         singedApks = Arrays.asList(signedFolder.listFiles()).stream()
                 .sorted((a,b) -> a.getAbsolutePath().compareTo(b.getAbsolutePath()))
-                .collect(Collectors.toUnmodifiableList());
+                .collect(Collectors.toList());
         unsingedApks = Arrays.asList(unsignedFolder.listFiles()).stream()
                 .sorted((a,b) -> a.getAbsolutePath().compareTo(b.getAbsolutePath()))
-                .collect(Collectors.toUnmodifiableList());
+                .collect(Collectors.toList());
 
         assertFalse(singedApks.isEmpty());
         assertFalse(unsingedApks.isEmpty());
@@ -180,7 +180,7 @@ public class SignToolTest {
         assertNotNull(result);
         assertEquals(0, result.unsuccessful);
         assertEquals(1, result.success);
-        assertEquals(1, outFolder.listFiles().length);
+        assertEquals(2, outFolder.listFiles().length); // contains apk and apk.idsign
         AndroidApkSignerVerify.Result verifyResult = new AndroidApkSignerVerify().verify(outFolder.listFiles()[0], null, null, false);
         assertTrue(verifyResult.verified);
         assertEquals(0, verifyResult.warnings.size());
