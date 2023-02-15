@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static junit.framework.TestCase.*;
 
@@ -45,8 +46,12 @@ public class SignToolTest {
         File signedFolder = new File(getClass().getClassLoader().getResource("test-apks-signed").toURI().getPath());
         File unsignedFolder = new File(getClass().getClassLoader().getResource("test-apks-unsigned").toURI().getPath());
 
-        singedApks = Arrays.asList(signedFolder.listFiles());
-        unsingedApks = Arrays.asList(unsignedFolder.listFiles());
+        singedApks = Arrays.asList(signedFolder.listFiles()).stream()
+                .sorted((a,b) -> a.getAbsolutePath().compareTo(b.getAbsolutePath()))
+                .collect(Collectors.toUnmodifiableList());
+        unsingedApks = Arrays.asList(unsignedFolder.listFiles()).stream()
+                .sorted((a,b) -> a.getAbsolutePath().compareTo(b.getAbsolutePath()))
+                .collect(Collectors.toUnmodifiableList());
 
         assertFalse(singedApks.isEmpty());
         assertFalse(unsingedApks.isEmpty());

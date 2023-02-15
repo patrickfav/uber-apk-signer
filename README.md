@@ -1,9 +1,10 @@
 # Uber Apk Signer
-A tool that helps signing, [zip aligning](https://developer.android.com/studio/command-line/zipalign.html) and verifying multiple Android application packages (APKs) with either debug or provided release certificates (or multiple). It supports [v1, v2](https://developer.android.com/about/versions/nougat/android-7.0.html#apk_signature_v2) and [v3 Android signing scheme](https://source.android.com/security/apksigning/v3). Easy and convenient debug signing with embedded debug keystore. Automatically verifies signature and zipalign after every signing.
+A tool that helps to sign, [zip aligning](https://developer.android.com/studio/command-line/zipalign.html) and verifying multiple Android application packages (APKs) with either debug or provided release certificates (or multiple). It supports [v1, v2](https://developer.android.com/about/versions/nougat/android-7.0.html#apk_signature_v2) and [v3 Android signing scheme](https://source.android.com/security/apksigning/v3). Easy and convenient debug signing with embedded debug keystore. Automatically verifies signature and zipalign after every signing.
 
 [![GitHub release](https://img.shields.io/github/release/patrickfav/uber-apk-signer.svg)](https://github.com/patrickfav/uber-apk-signer/releases/latest)
-[![Build Status](https://travis-ci.com/patrickfav/uber-apk-signer.svg?branch=master)](https://travis-ci.com/patrickfav/uber-apk-signer)
-[![Coverage Status](https://coveralls.io/repos/github/patrickfav/uber-apk-signer/badge.svg?branch=master)](https://coveralls.io/github/patrickfav/uber-apk-signer?branch=master) [![Maintainability](https://api.codeclimate.com/v1/badges/e411436386ab41819b89/maintainability)](https://codeclimate.com/github/patrickfav/uber-apk-signer/maintainability)
+[![Github Actions](https://github.com/patrickfav/uber-apk-signer/actions/workflows/build_deploy.yml/badge.svg)](https://github.com/patrickfav/uber-apk-signer/actions)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=patrickfav_uber-apk-signer&metric=coverage)](https://sonarcloud.io/summary/new_code?id=patrickfav_uber-apk-signer)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=patrickfav_uber-apk-signer&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=patrickfav_uber-apk-signer)
 
 Main features:
 
@@ -18,7 +19,7 @@ Basic usage:
 
     java -jar uber-apk-signer.jar --apks /path/to/apks
 
-This should run on any Windows, Mac or Linux machine where Java8+ is installed. 
+This should run on any Windows, Mac or Linux machine where JDK8 is installed. 
 
 ### Requirements
 
@@ -27,7 +28,7 @@ This should run on any Windows, Mac or Linux machine where Java8+ is installed.
 
 ## Download
 
-[Grab jar from latest Release](https://github.com/patrickfav/uber-apk-signer/releases/latest)
+[Grab jar from the latest Release](https://github.com/patrickfav/uber-apk-signer/releases/latest)
 
 ## Demo
 
@@ -122,7 +123,7 @@ Provide your sha256 hash to check against the signature:
 
 ### Process Return Value
 
-This application will return `0` if every signing/verifing was successful, `1` if an error happens (e.g. wrong arguments) and `2` if at least 1 sign/verify process was not successful.
+This application will return `0` if every signing/verifying was successful, `1` if an error happens (e.g. wrong arguments) and `2` if at least 1 sign/verify process was not successful.
 
 ### Debug Signing Mode
 
@@ -137,7 +138,7 @@ A log message will indicate which one was chosen.
 
 ### Zipalign Executable
 
-[`Zipalign`](https://developer.android.com/studio/command-line/zipalign.html) is a tool developed by Google to optimize zips (apks). It is needed if you want to upload it to the Playstore otherwise it is optional. By default this tool will try to zipalign the apk, therefore it will need the location of the executable. If the path isn't passed in the command line interface, the tool checks if it is in `PATH` environment variable, otherwise it will try to use an embedded version of zipalign. 
+[`Zipalign`](https://developer.android.com/studio/command-line/zipalign.html) is a tool developed by Google to optimize zips (apks). It is needed if you want to upload it to the Playstore otherwise it is optional. By default, this tool will try to zipalign the apk, therefore it will need the location of the executable. If the path isn't passed in the command line interface, the tool checks if it is in `PATH` environment variable, otherwise it will try to use an embedded version of zipalign. 
 
 If `--skipZipAlign` is passed no executable is needed.
 
@@ -161,7 +162,7 @@ This tool does not directly support the creation of lineage files as it is consi
 
 ## Signed Release Jar
 
-The provided JARs in the Github release page are signed with my private key:
+The provided JARs in the GitHub release page are signed with my private key:
 
     CN=Patrick Favre-Bulle, OU=Private, O=PF Github Open Source, L=Vienna, ST=Vienna, C=AT
     Validity: Thu Sep 07 16:40:57 SGT 2017 to: Fri Feb 10 16:40:57 SGT 2034
@@ -179,10 +180,10 @@ Use the Maven wrapper to create a jar including all dependencies
 ### Checkstyle Config File
 
 This project uses my [`common-parent`](https://github.com/patrickfav/mvn-common-parent) which centralized a lot of
-the plugin versions aswell as providing the checkstyle config rules. Specifically they are maintained in [`checkstyle-config`](https://github.com/patrickfav/checkstyle-config). Locally the files will be copied after you `mvnw install` into your `target` folder and is called
+the plugin versions as well as providing the checkstyle config rules. Specifically they are maintained in [`checkstyle-config`](https://github.com/patrickfav/checkstyle-config). Locally the files will be copied after you `mvnw install` into your `target` folder and is called
 `target/checkstyle-checker.xml`. So if you use a plugin for your IDE, use this file as your local configuration.
 
-## Tech Stack
+## Tech-Stack
 
 * Java 8
 * Maven
