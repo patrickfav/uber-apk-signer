@@ -39,9 +39,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Build with Maven
-        run: ./mvnw -B clean package checkstyle:checkstyle -DcommonConfig.jarSign.skip=true
-      - name: Collect Code Coverage # for any reason JaCoCo fails if it is done in a single step
-        run: ./mvnw -B jacoco:report
+        run: ./mvnw -B clean verify -DcommonConfig.jarSign.skip=true
       - name: Analyze with SonaQube
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
@@ -73,7 +71,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Build with Maven
-        run: ./mvnw -B package
+        run: ./mvnw -B verify
       - name: Create and upload Github Release
         uses: xresloader/upload-to-github-release@v1
         env:
