@@ -38,7 +38,9 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Build with Maven
-        run: ./mvnw -B clean verify -DcommonConfig.jarSign.skip=true
+        run: ./mvnw -B clean verify -DcommonConfig.jarSign.skip=true -Djacoco.skip=true
+      - name: Prepare Jacoco Coverage Report # Because of strange bug, jacoco needs to be done in separate call
+        run: ./mvnw -B jacoco:report
       - name: Analyze with SonaQube
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
@@ -94,6 +96,9 @@ jobs:
           distribution: 'temurin'
       - name: Build with Maven
         run: ./mvnw -B verify -DskipTests
+        env:
+          OPENSOURCE_PROJECTS_KS_PW: ${{ secrets.KEYSTORE_PASSWORD }}
+          OPENSOURCE_PROJECTS_KEY_PW: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
       - name: Create and upload Github Release
         uses: xresloader/upload-to-github-release@v1
         env:
