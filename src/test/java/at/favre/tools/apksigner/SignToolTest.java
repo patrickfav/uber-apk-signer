@@ -47,11 +47,11 @@ public class SignToolTest {
         File unsignedFolder = new File(getClass().getClassLoader().getResource("test-apks-unsigned").toURI().getPath());
 
         singedApks = Arrays.asList(signedFolder.listFiles()).stream()
-                .sorted((a,b) -> a.getAbsolutePath().compareTo(b.getAbsolutePath()))
-                .collect(Collectors.toUnmodifiableList());
+                .sorted((a, b) -> a.getAbsolutePath().compareTo(b.getAbsolutePath()))
+                .collect(Collectors.toList());
         unsingedApks = Arrays.asList(unsignedFolder.listFiles()).stream()
-                .sorted((a,b) -> a.getAbsolutePath().compareTo(b.getAbsolutePath()))
-                .collect(Collectors.toUnmodifiableList());
+                .sorted((a, b) -> a.getAbsolutePath().compareTo(b.getAbsolutePath()))
+                .collect(Collectors.toList());
 
         assertFalse(singedApks.isEmpty());
         assertFalse(unsingedApks.isEmpty());
@@ -173,15 +173,15 @@ public class SignToolTest {
         List<File> signedApks = copyToTestPath(originalFolder, Collections.singletonList(singedApks.get(0)));
         File signedApk = signedApks.get(0);
 
-        String cmd = "-" + CLIParser.ARG_APK_FILE + " " + signedApk.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath() + " --skipZipAlign --allowResign --debug --ks " + testReleaseKs.getAbsolutePath() + " --ksPass " + ksPass + " --ksKeyPass " + keyPass + " --ksAlias " + ksAlias;
+        String cmd = "-" + CLIParser.ARG_APK_FILE + " " + signedApk.getAbsolutePath() + " -" + CLIParser.ARG_APK_OUT + " " + outFolder.getAbsolutePath() + " --allowResign --debug --ks " + testReleaseKs.getAbsolutePath() + " --ksPass " + ksPass + " --ksKeyPass " + keyPass + " --ksAlias " + ksAlias;
 
         System.out.println(cmd);
         SignTool.Result result = SignTool.mainExecute(CLIParserTest.asArgArray(cmd));
         assertNotNull(result);
         assertEquals(0, result.unsuccessful);
         assertEquals(1, result.success);
-        assertEquals(1, outFolder.listFiles().length);
-        AndroidApkSignerVerify.Result verifyResult = new AndroidApkSignerVerify().verify(outFolder.listFiles()[0], null, null, false);
+        assertEquals(2, outFolder.listFiles().length); // contains apk and v4 apk.idsign
+        AndroidApkSignerVerify.Result verifyResult = new AndroidApkSignerVerify().verify(outFolder.listFiles()[0], null, null, null, false);
         assertTrue(verifyResult.verified);
         assertEquals(0, verifyResult.warnings.size());
         assertEquals(0, verifyResult.errors.size());
@@ -242,7 +242,7 @@ public class SignToolTest {
         assertEquals("should be same count of apks in out folder", uApks.size(), outFiles.length);
 
         for (File outFile : outFiles) {
-            AndroidApkSignerVerify.Result verifyResult = new AndroidApkSignerVerify().verify(outFile, null, null, false);
+            AndroidApkSignerVerify.Result verifyResult = new AndroidApkSignerVerify().verify(outFile, null, null, null, false);
             assertTrue(verifyResult.verified);
             assertEquals(0, verifyResult.warnings.size());
             assertEquals(0, verifyResult.errors.size());

@@ -27,7 +27,6 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
       - name: Cache Maven
-        id: cache-primes
         uses: actions/cache@v3
         with:
           path: ~/.m2
@@ -46,8 +45,32 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=$SONARQUBE_PROJECT
 
+  build_multi_os:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Cache Maven
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Build with Maven
+        run: ./mvnw -B clean package "-DcommonConfig.jarSign.skip=true"
+
   deploy:
-    needs: build
+    needs: [build, build_multi_os]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
 
@@ -59,7 +82,6 @@ jobs:
         run: |
           echo $KEYSTORE_BASE64 | base64 --decode > keystore.jks
       - name: Cache Maven
-        id: cache-primes
         uses: actions/cache@v3
         with:
           path: ~/.m2

@@ -58,7 +58,7 @@ public class CertHashCheckerTest {
 
     @Test
     public void testNotVerified() {
-        assertNull(new CertHashChecker().check(new AndroidApkSignerVerify.Result(false, null, null, null, true, true, true, null), null));
+        assertNull(new CertHashChecker().check(new AndroidApkSignerVerify.Result(false, null, null, null, true, true, true, true, true, null), null));
     }
 
     private static AndroidApkSignerVerify.Result getVerifyResult(String... shas256) {
@@ -69,6 +69,6 @@ public class CertHashCheckerTest {
             certInfos.add(info);
         }
 
-        return new AndroidApkSignerVerify.Result(true, null, null, null, true, true, true, certInfos);
+        return new AndroidApkSignerVerify.Result(true, null, null, null, true, true, true, true, true, certInfos);
     }
 }

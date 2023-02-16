@@ -8,8 +8,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Responsible for deciding and finding the zipalign executable used by the tool.
@@ -49,21 +48,30 @@ public class ZipAlignExecutor {
                 if (zipAlignExecutable == null) {
                     CmdUtil.OS osType = CmdUtil.getOsType();
 
-                    String fileName, lib = null;
+                    String zipAlignFileName, libFolder;
+                    List<String> libFiles = new ArrayList<>();
                     if (osType == CmdUtil.OS.WIN) {
-                        fileName = "win-zipalign_29_0_2.exe";
-                        lib = "libwinpthread-1-29_0_2.dll";
+                        zipAlignFileName = "win-zipalign_33_0_2.exe";
+                        libFolder = "binary-lib/windows-33_0_2/";
+                        libFiles.add(libFolder + "libwinpthread-1.dll");
                     } else if (osType == CmdUtil.OS.MAC) {
-                        fileName = "mac-zipalign-29_0_2";
-                        lib = "linux64-libc++-29_0_2.so";
+                        zipAlignFileName = "mac-zipalign-33_0_2";
                     } else {
-                        fileName = "linux-zipalign-29_0_2";
-                        lib = "linux64-libc++-29_0_2.so";
+                        zipAlignFileName = "linux-zipalign-33_0_2";
+                        libFolder = "binary-lib/linux-lib64-33_0_2/";
+                        libFiles.add(libFolder + "libc++.so");
                     }
 
                     tmpFolder = Files.createTempDirectory("uapksigner-").toFile();
-                    File tmpZipAlign = File.createTempFile(fileName, null, tmpFolder);
-                    Files.copy(getClass().getClassLoader().getResourceAsStream(fileName), tmpZipAlign.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    File tmpZipAlign = File.createTempFile(zipAlignFileName, null, tmpFolder);
+                    Files.copy(
+                            Objects.requireNonNull(
+                                    getClass().getClassLoader().getResourceAsStream(zipAlignFileName),
+                                    "could not load built-in zipalign " + zipAlignFileName
+                            ),
+                            tmpZipAlign.toPath(),
+                            StandardCopyOption.REPLACE_EXISTING
+                    );
 
                     if (osType != CmdUtil.OS.WIN) {
                         Set<PosixFilePermission> perms = new HashSet<>();
@@ -71,12 +79,41 @@ public class ZipAlignExecutor {
 
                         Files.setPosixFilePermissions(tmpZipAlign.toPath(), perms);
 
-                        File lib64File = new File(new File(tmpFolder, "lib64"), "libc++.so");
-                        lib64File.mkdirs();
-                        Files.setPosixFilePermissions(lib64File.toPath(), perms);
-                        Files.copy(getClass().getClassLoader().getResourceAsStream(lib), lib64File.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        File libFolderFile = new File(tmpFolder, "lib64");
+                        if (!libFolderFile.mkdirs()) {
+                            throw new IllegalStateException("could not create " + libFolderFile);
+                        }
+
+                        for (String libFile : libFiles) {
+                            File lib64File = new File(libFolderFile, new File(libFile).getName());
+
+                            if (!lib64File.createNewFile()) {
+                                throw new IllegalStateException("could not create " + lib64File);
+                            }
+
+                            Files.setPosixFilePermissions(lib64File.toPath(), perms);
+
+                            Files.copy(
+                                    Objects.requireNonNull(
+                                            getClass().getClassLoader().getResourceAsStream(libFile),
+                                            "could not load built-in lib file " + libFile
+                                    ),
+                                    lib64File.toPath(),
+                                    StandardCopyOption.REPLACE_EXISTING
+                            );
+                        }
                     } else {
-                        Files.copy(getClass().getClassLoader().getResourceAsStream(lib), new File(tmpFolder, "libwinpthread-1.dll").toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        for (String libFile : libFiles) {
+                            System.out.println(libFile);
+                            System.out.println(tmpFolder);
+
+                            Files.copy(
+                                    Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(libFile), "could not load lib file " + libFile),
+                                    new File(tmpFolder, new File(libFile).getName()).toPath(),
+                                    StandardCopyOption.REPLACE_EXISTING
+                            );
+                        }
+
                     }
 
                     zipAlignExecutable = new String[]{tmpZipAlign.getAbsolutePath()};

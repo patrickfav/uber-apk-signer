@@ -123,7 +123,7 @@
             <artifactId>apksigner</artifactId>
             <version>1.0</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/apksigner_29_0_2.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/resources/lib/apksigner_33_0_2.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>at.favre.lib</groupId>
