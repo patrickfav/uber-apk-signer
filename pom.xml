@@ -15,7 +15,7 @@
     <version>1.3.0</version>
 
     <properties>
-        <commonConfig.jarSign.skip>true</commonConfig.jarSign.skip>
+        <commonConfig.jarSign.skip>false</commonConfig.jarSign.skip>
         <!-- TODO until we fix https://github.com/patrickfav/uber-apk-signer/issues/24 -->
         <commonConfig.jacoco.check.disable>true</commonConfig.jacoco.check.disable>
         <!-- SonarQube Config -->
