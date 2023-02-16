@@ -59,8 +59,6 @@ public class ZipAlignExecutor {
                     } else {
                         zipAlignFileName = "linux-zipalign-33_0_2";
                         libFolder = "binary-lib/linux-lib64-33_0_2/";
-                        libFiles.add(libFolder + "libbcc.so");
-                        libFiles.add(libFolder + "libbcinfo.so");
                         libFiles.add(libFolder + "libc++.so");
                     }
 
