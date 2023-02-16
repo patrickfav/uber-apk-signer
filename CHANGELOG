@@ -6,6 +6,12 @@
 * update some dependencies
 * fix flaky tests
 
+## v1.3.0
+
+* update internal apksigner implementation to 33.0.2 and zipalign binaries
+* improve support for v3.1 and v4 signature schema
+
+
 ## v1.2.1
 
 * minor: fix using incorrect version number
