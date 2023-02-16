@@ -331,7 +331,7 @@ public final class SignTool {
     private static AndroidApkSignerVerify.Result verifySign(File targetApkFile, File rootTargetFile, String[] checkHashes, boolean verbose, boolean preCheckVerify) {
         try {
             AndroidApkSignerVerify verifier = new AndroidApkSignerVerify();
-            AndroidApkSignerVerify.Result result = verifier.verify(targetApkFile, null, null, false);
+            AndroidApkSignerVerify.Result result = verifier.verify(targetApkFile, null, null, null, false);
 
             if (!preCheckVerify) {
                 String logMsg;
