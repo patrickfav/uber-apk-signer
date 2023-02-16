@@ -56,10 +56,6 @@ public class ZipAlignExecutor {
                         libFiles.add(libFolder + "libwinpthread-1.dll");
                     } else if (osType == CmdUtil.OS.MAC) {
                         zipAlignFileName = "mac-zipalign-33_0_2";
-                        libFolder = "binary-lib/linux-lib64-33_0_2/";
-                        libFiles.add(libFolder + "libbcc.so");
-                        libFiles.add(libFolder + "libbcinfo.so");
-                        libFiles.add(libFolder + "libc++.so");
                     } else {
                         zipAlignFileName = "linux-zipalign-33_0_2";
                         libFolder = "binary-lib/linux-lib64-33_0_2/";
