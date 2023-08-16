@@ -26,6 +26,15 @@
         <sonar.language>java</sonar.language>
     </properties>
 
+    <!-- required to get the apk signer dependency -->
+    <repositories>
+        <repository>
+            <id>Google</id>
+            <name>Google</name>
+            <url>https://maven.google.com/</url>
+        </repository>
+    </repositories>
+
     <build>
         <plugins>
             <plugin>
@@ -119,11 +128,9 @@
             <version>1.5.0</version>
         </dependency>
         <dependency>
-            <groupId>com.android</groupId>
-            <artifactId>apksigner</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/apksigner_33_0_2.jar</systemPath>
+            <groupId>com.android.tools.build</groupId>
+            <artifactId>apksig</artifactId>
+            <version>8.0.2</version>
         </dependency>
         <dependency>
             <groupId>at.favre.lib</groupId>
